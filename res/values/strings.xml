@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Youzik</string>
+    <string name="action_settings">Settings</string>
+    <string name="browser_tab_title">Browse</string>
+    <string name="download_tab_title">Download</string>
+    <string name="play_tab_title">Player</string>
+
+</resources>
