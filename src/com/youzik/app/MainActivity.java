@@ -72,6 +72,8 @@ public class MainActivity extends FragmentActivity implements
 		this.setContentView(R.layout.activity_main);
 		
 		final ActionBar actionBar = this.getActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setDisplayShowHomeEnabled(false);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 		// Create the adapter that will return a fragment for each of the three primary sections of the app.

@@ -7,21 +7,22 @@ public class Download implements Parcelable {
 	
 	private long id;
 	private String name = "";
-	
-    public static final Parcelable.Creator<Download> CREATOR = new Parcelable.Creator<Download>() {
-        @Override
-        public Download createFromParcel(Parcel source) {
-            Download dl = new Download();
-            dl.setId(source.readLong());
-            dl.setName(source.readString());
-            return dl;
-        }
+	private String url = "";
 
-        @Override
-        public Download[] newArray(int size) {
-            return new Download[size];
-        }
-    };
+	public static final Parcelable.Creator<Download> CREATOR = new Parcelable.Creator<Download>() {
+		@Override
+		public Download createFromParcel(Parcel source) {
+			Download dl = new Download();
+			dl.setId(source.readLong());
+			dl.setName(source.readString());
+			return dl;
+		}
+
+		@Override
+		public Download[] newArray(int size) {
+			return new Download[size];
+		}
+	};
 	
 	/**
 	 * @return the id
@@ -49,6 +50,20 @@ public class Download implements Parcelable {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the url
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * @param url the url to set
+	 */
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	@Override
