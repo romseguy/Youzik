@@ -18,7 +18,6 @@ public class MainActivity extends FragmentActivity implements
 		ActionBar.TabListener {
 	
 	private SectionsPagerAdapter mSectionsPagerAdapter;
-	private ViewPager mViewPager;
 	
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		
@@ -65,6 +64,8 @@ public class MainActivity extends FragmentActivity implements
 			}
 		}
 	}
+	
+	private ViewPager mViewPager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

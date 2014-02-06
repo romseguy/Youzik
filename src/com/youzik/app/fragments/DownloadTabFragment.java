@@ -18,7 +18,6 @@ import android.widget.ArrayAdapter;
 public class DownloadTabFragment extends ListFragment {
 
 	private DownloadsAdapter adapter;
-	private List<Download> data;
 	
 	public class DownloadsAdapter extends ArrayAdapter<Download> {
 
@@ -39,6 +38,8 @@ public class DownloadTabFragment extends ListFragment {
 		}
 		
 	}
+	
+	private List<Download> data;
 
 	private void createList() {
 		this.data = new ArrayList<Download>();

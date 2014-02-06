@@ -1,7 +1,10 @@
 package com.youzik.app.fragments;
 
+import com.youzik.app.DownloadManagerService;
 import com.youzik.app.R;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -20,7 +23,20 @@ public class BrowseTabFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.browse_tab, container, false);
 		webView = (WebView) ll.findViewById(R.id.webView);
-		webView.setWebViewClient(new WebViewClient());
+		webView.setWebViewClient(new WebViewClient() {
+	        @Override
+	        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+	            if (!url.endsWith(".mp3"))
+	            	return super.shouldOverrideUrlLoading(view, url);
+	            
+	            if (getActivity() != null) {
+	            	Intent intent = new Intent(getActivity(), DownloadManagerService.class);
+                	intent.setDataAndType(Uri.parse(url), "audio/mpeg");
+                	view.getContext().startService(intent);
+	            }
+                return true;
+	        }
+		});
 		
 		if (webViewBundle == null) {
 		    webView.loadUrl("http://tuto-geek.com/sample.html");
@@ -32,9 +48,10 @@ public class BrowseTabFragment extends Fragment {
 	}
 	
 	/**
-	 * Save the state of the webView in the webViewBundle
-	 * the method onPause is called when the Fragment is going into the background
-	 * so it can be restored in the onCreateView method when going back to the browse tab
+	 * Saves the state of the webView in the webViewBundle.
+	 * Called when the Fragment is going into the background
+	 * so it can be restored in the onCreateView method
+	 * when going back to the browse tab.
 	 */
     @Override
     public void onPause() {
