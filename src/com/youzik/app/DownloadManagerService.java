@@ -1,5 +1,8 @@
 package com.youzik.app;
 
+import com.youzik.app.entities.Download;
+import com.youzik.app.entities.database.DownloadDatabase;
+
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
@@ -11,12 +14,21 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IInterface;
 import android.util.Log;
-import android.view.View;
 
 public class DownloadManagerService extends Service {
+	
+	/**
+	 *  MainActivity will implement this interface so we can notify DownloadTabFragment
+	 *  to refresh the completed downloads list once the download is completed
+	 */
+	public interface OnDownloadCompletedHandler extends IInterface {
+		public void updateDownloadList();
+	}
 
 	private final IBinder binder = new LocalBinder();
+	private OnDownloadCompletedHandler downloadCompletedHandler = null;
 	
 	public class LocalBinder extends Binder {
 		DownloadManagerService getService() {
@@ -47,19 +59,26 @@ public class DownloadManagerService extends Service {
 				
 				Query query = new Query();
 				query.setFilterById(enqueue);
-				Cursor c = downloadManager.query(query);
+				Cursor cursor = downloadManager.query(query);
 
-				if (!c.moveToFirst()) {
+				if (!cursor.moveToFirst()) {
 					Log.v("DownloadManager", "download list is empty");
 					return;
 				}
 				
-				if (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)) != DownloadManager.STATUS_SUCCESSFUL) {
+				if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) != DownloadManager.STATUS_SUCCESSFUL) {
 					Log.v("DownloadManager", "download has completed but is not successful");
 					return;
 				}
 				
-				Log.v("DownloadManager", "uriString=" + c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+				Download dl = new Download();
+				dl.setId(cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID)));
+				dl.setName(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)));
+				dl.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+				
+				DownloadDatabase db = new DownloadDatabase(DownloadManagerService.this.getBaseContext());
+				db.insertDownload(dl);
+				downloadCompletedHandler.updateDownloadList();
 			}
 		};
 
@@ -67,14 +86,9 @@ public class DownloadManagerService extends Service {
 		return START_STICKY;
 	}
 
-	public void showDownload(View view) {
-		Intent i = new Intent();
-		i.setAction(DownloadManager.ACTION_VIEW_DOWNLOADS);
-		startActivity(i);
-	}
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		return binder;
 	}
+    
 }
