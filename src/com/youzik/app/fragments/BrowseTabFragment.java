@@ -3,7 +3,6 @@ package com.youzik.app.fragments;
 import com.youzik.app.MainActivity;
 import com.youzik.app.R;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -31,7 +30,7 @@ public class BrowseTabFragment extends Fragment {
 	            if (getActivity() != null) {
                 	String downloadTabFragmentTag = ((MainActivity) getActivity()).getDownloadTabFragmentTag();
                 	DownloadTabFragment downloadTabFragment = (DownloadTabFragment)getActivity().getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
-                	downloadTabFragment.startDownloading(Uri.parse(url));
+                	downloadTabFragment.startDownloading(url);
 	            }
                 return true;
 	        }

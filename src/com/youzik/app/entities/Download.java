@@ -15,6 +15,7 @@ public class Download implements Parcelable {
 			Download dl = new Download();
 			dl.setId(source.readLong());
 			dl.setName(source.readString());
+			dl.setUrl(source.readString());
 			return dl;
 		}
 
@@ -23,6 +24,13 @@ public class Download implements Parcelable {
 			return new Download[size];
 		}
 	};
+	
+	@Override
+	public void writeToParcel(Parcel dst, int flag) {
+		dst.writeLong(this.id);
+		dst.writeString(this.name);
+		dst.writeString(this.url);
+	}
 	
 	/**
 	 * @return the id
@@ -73,13 +81,7 @@ public class Download implements Parcelable {
 
 	@Override
 	public String toString() {
-		return "Download [id=" + this.id + ", name=" + this.name + "]";
-	}
-
-	@Override
-	public void writeToParcel(Parcel dst, int flag) {
-		dst.writeLong(this.id);
-		dst.writeString(this.name);
+		return "Download [id=" + this.id + ", name=" + this.name + ", url=" + this.url + "]";
 	}
 
 }
