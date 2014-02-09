@@ -14,21 +14,11 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.IInterface;
 import android.util.Log;
 
 public class DownloadManagerService extends Service {
-	
-	/**
-	 *  MainActivity will implement this interface so we can notify DownloadTabFragment
-	 *  to refresh the completed downloads list once the download is completed
-	 */
-	public interface OnDownloadCompletedHandler extends IInterface {
-		public void updateDownloadList();
-	}
 
 	private final IBinder binder = new LocalBinder();
-	private OnDownloadCompletedHandler downloadCompletedHandler = null;
 	
 	public class LocalBinder extends Binder {
 		DownloadManagerService getService() {
@@ -36,9 +26,16 @@ public class DownloadManagerService extends Service {
 		}
 	}
 	
+	//public static DownloadManagerService dms;
+	
 	private long enqueue;
 	private DownloadManager downloadManager;
 	
+/*	@Override
+	public void onCreate() {
+		dms = this;
+	}*/
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
@@ -78,7 +75,6 @@ public class DownloadManagerService extends Service {
 				
 				DownloadDatabase db = new DownloadDatabase(DownloadManagerService.this.getBaseContext());
 				db.insertDownload(dl);
-				downloadCompletedHandler.updateDownloadList();
 			}
 		};
 

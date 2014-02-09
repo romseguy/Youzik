@@ -1,9 +1,8 @@
 package com.youzik.app.fragments;
 
-import com.youzik.app.DownloadManagerService;
+import com.youzik.app.MainActivity;
 import com.youzik.app.R;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,9 +29,9 @@ public class BrowseTabFragment extends Fragment {
 	            	return super.shouldOverrideUrlLoading(view, url);
 	            
 	            if (getActivity() != null) {
-	            	Intent intent = new Intent(getActivity(), DownloadManagerService.class);
-                	intent.setDataAndType(Uri.parse(url), "audio/mpeg");
-                	view.getContext().startService(intent);
+                	String downloadTabFragmentTag = ((MainActivity) getActivity()).getDownloadTabFragmentTag();
+                	DownloadTabFragment downloadTabFragment = (DownloadTabFragment)getActivity().getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
+                	downloadTabFragment.startDownloading(Uri.parse(url));
 	            }
                 return true;
 	        }

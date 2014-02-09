@@ -7,7 +7,6 @@ import com.youzik.app.fragments.*;
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -16,15 +15,9 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 
 public class MainActivity extends FragmentActivity implements
-		ActionBar.TabListener,
-		DownloadManagerService.OnDownloadCompletedHandler {
-	
-	public interface OnDownloadCompletedCallback {
-		public void downloadCompleted();
-	}
+		ActionBar.TabListener {
 	
 	private SectionsPagerAdapter mSectionsPagerAdapter;
-	OnDownloadCompletedCallback downloadCompletedCallback;
 	
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		
@@ -42,9 +35,7 @@ public class MainActivity extends FragmentActivity implements
 				case BROWSE_TAB:
 					return new BrowseTabFragment();
 				case DOWNLOAD_TAB:
-					DownloadTabFragment f = new DownloadTabFragment();
-					downloadCompletedCallback = (OnDownloadCompletedCallback) f;
-					return f;
+					return new DownloadTabFragment();
 				case PLAY_TAB:
 					return new PlayTabFragment();
 				default:
@@ -74,6 +65,15 @@ public class MainActivity extends FragmentActivity implements
 	}
 	
 	private ViewPager mViewPager;
+	private String downloadTabFragmentTag = "";
+	
+	public String getDownloadTabFragmentTag() {
+		return downloadTabFragmentTag;
+	}
+
+	public void setDownloadTabFragmentTag(String downloadTabFragmentTag) {
+		this.downloadTabFragmentTag = downloadTabFragmentTag;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -130,17 +130,6 @@ public class MainActivity extends FragmentActivity implements
 
 	@Override
 	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-	}
-
-	@Override
-	public IBinder asBinder() {
-		return null;
-	}
-	
-	@Override
-	public void updateDownloadList() {
-		if (downloadCompletedCallback instanceof Fragment)
-			downloadCompletedCallback.downloadCompleted();
 	}
 
 }

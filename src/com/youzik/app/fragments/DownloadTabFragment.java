@@ -3,22 +3,30 @@ package com.youzik.app.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.youzik.app.DownloadManagerService;
+import com.youzik.app.MainActivity;
 import com.youzik.app.R;
 import com.youzik.app.entities.Download;
 import com.youzik.app.entities.database.DownloadDatabase;
-import com.youzik.app.MainActivity;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class DownloadTabFragment extends ListFragment implements MainActivity.OnDownloadCompletedCallback {
+public class DownloadTabFragment extends ListFragment {
 
 	private DownloadsAdapter adapter;
 	
@@ -45,6 +53,53 @@ public class DownloadTabFragment extends ListFragment implements MainActivity.On
 		
 	}
 	
+	private ProgressBar progressBar;
+	
+	public class ProgressAsyncTask extends AsyncTask<Void, Integer, Void> {
+
+		private Context context = null;
+		private Intent intent = null;
+		private DownloadManagerService service = null;
+		private int progressValue;
+
+		public ProgressAsyncTask(Context context, Intent intent) {
+			this.context = context;
+			this.intent = intent;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progressValue = 0;
+			
+			if (context != null && intent != null) {
+				context.startService(intent);
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			DownloadTabFragment.this.updateList();
+		}
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			while (progressValue < 100) {
+				progressValue++;
+				publishProgress(progressValue);
+				SystemClock.sleep(100);
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+	}
+	
 	private List<Download> data;
 
 	private void createList() {
@@ -64,15 +119,24 @@ public class DownloadTabFragment extends ListFragment implements MainActivity.On
 		this.adapter.notifyDataSetChanged();
 	}
 	
+    public void startDownloading(Uri url) {
+    	Intent intent = new Intent(getActivity(), DownloadManagerService.class);
+    	intent.setDataAndType(url, "audio/mpeg");
+    	new ProgressAsyncTask(getActivity(), intent).execute();
+	}
+	
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
     	super.onActivityCreated(savedInstanceState);
     	this.createList();
     }
-
+    
 	@Override
-	public void downloadCompleted() {
-		this.updateList();
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View downloadTabView = inflater.inflate(R.layout.download_tab, container, false);
+		((MainActivity) getActivity()).setDownloadTabFragmentTag(getTag());
+		progressBar = (ProgressBar) downloadTabView.findViewById(R.id.progressbar);
+		return downloadTabView;
 	}
 
 }
