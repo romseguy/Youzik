@@ -1,4 +1,4 @@
-package com.youzik.app;
+package com.youzik.services;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;

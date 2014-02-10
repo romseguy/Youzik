@@ -27,7 +27,7 @@
         </activity>
         
         <service
-            android:name="com.youzik.app.DownloadManagerService"
+            android:name="com.youzik.services.DownloadManagerService"
             android:enabled="true"
             android:exported="false" />
         

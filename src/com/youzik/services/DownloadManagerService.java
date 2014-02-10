@@ -1,4 +1,4 @@
-package com.youzik.app;
+package com.youzik.services;
 
 import com.youzik.app.entities.Download;
 

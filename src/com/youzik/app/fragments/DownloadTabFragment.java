@@ -3,11 +3,11 @@ package com.youzik.app.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.youzik.app.DownloadManagerService;
 import com.youzik.app.MainActivity;
 import com.youzik.app.R;
 import com.youzik.app.entities.Download;
 import com.youzik.app.entities.database.DownloadDatabase;
+import com.youzik.services.DownloadManagerService;
 
 import android.app.Activity;
 import android.app.DownloadManager;
@@ -116,13 +116,12 @@ public class DownloadTabFragment extends ListFragment {
 			while (downloading) {
 				int bytes_downloaded = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
 	            int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+	            int progress = (bytes_downloaded / bytes_total) * 100;
+	            publishProgress(progress);
 	            
 	            if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
                     downloading = false;
                 }
-	            
-				publishProgress((bytes_downloaded / bytes_total) * 100);
-				cursor.moveToNext();
 			}
 			
 			cursor.close();

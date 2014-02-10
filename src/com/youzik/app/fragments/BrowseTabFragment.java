@@ -29,7 +29,7 @@ public class BrowseTabFragment extends Fragment {
 	            
 	            if (getActivity() != null) {
                 	String downloadTabFragmentTag = ((MainActivity) getActivity()).getDownloadTabFragmentTag();
-                	DownloadTabFragment downloadTabFragment = (DownloadTabFragment)getActivity().getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
+                	DownloadTabFragment downloadTabFragment = (DownloadTabFragment) getActivity().getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
                 	downloadTabFragment.startDownloading(url);
 	            }
                 return true;
