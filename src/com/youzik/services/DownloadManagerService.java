@@ -8,6 +8,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.util.Log;
 
 public class DownloadManagerService extends IntentService {
@@ -30,25 +31,42 @@ public class DownloadManagerService extends IntentService {
 		long downloadId = downloadManager.enqueue(request);
 		
 		// get a cursor to it
-		Cursor cursor = downloadManager.query(new DownloadManager.Query().setFilterById(downloadId));
+		DownloadManager.Query q = new DownloadManager.Query();
+		q.setFilterById(downloadId);
+		Cursor cursor = downloadManager.query(q);
 
 		if (!cursor.moveToFirst()) {
 			Log.v("DownloadManagerService", "download list is empty");
 			return;
 		}
 		
-		Download dl = new Download();
-		dl.setId(cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID)));
-		dl.setName(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)));
-		dl.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
-		cursor.close();
+		int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
 		
-		// notifiy the BroadcastReceiver downloadStartedReceiver that the download has started
-		Intent intent = new Intent();
-		intent.setAction(ACTION_DOWNLOAD_STARTED);
-		intent.addCategory(Intent.CATEGORY_DEFAULT);
-		intent.putExtra(DownloadManagerService.DATA, dl);
-	    sendBroadcast(intent);
+		// wait for the download to start
+		while (status == DownloadManager.STATUS_PENDING) {
+			SystemClock.sleep(1000);
+			cursor = downloadManager.query(q);
+			
+			if (cursor.moveToFirst())
+				status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+		}
+		
+		if (status == DownloadManager.STATUS_RUNNING) {
+			Download dl = new Download();
+			dl.setId(cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID)));
+			dl.setName(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)));
+			dl.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+			cursor.close();
+			
+			// notifiy the BroadcastReceiver downloadStartedReceiver that the download has started
+			Intent intent = new Intent();
+			intent.setAction(ACTION_DOWNLOAD_STARTED);
+			intent.addCategory(Intent.CATEGORY_DEFAULT);
+			intent.putExtra(DownloadManagerService.DATA, dl);
+		    sendBroadcast(intent);
+		}
+		
+		cursor.close();
 	}
     
 }
