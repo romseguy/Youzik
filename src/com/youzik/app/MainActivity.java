@@ -17,6 +17,16 @@ import android.view.Menu;
 public class MainActivity extends FragmentActivity implements
 		ActionBar.TabListener {
 	
+	private String downloadTabFragmentTag = "";
+	
+	public String getDownloadTabFragmentTag() {
+		return downloadTabFragmentTag;
+	}
+
+	public void setDownloadTabFragmentTag(String downloadTabFragmentTag) {
+		this.downloadTabFragmentTag = downloadTabFragmentTag;
+	}
+	
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -65,15 +75,6 @@ public class MainActivity extends FragmentActivity implements
 	}
 	
 	private ViewPager mViewPager;
-	private String downloadTabFragmentTag = "";
-	
-	public String getDownloadTabFragmentTag() {
-		return downloadTabFragmentTag;
-	}
-
-	public void setDownloadTabFragmentTag(String downloadTabFragmentTag) {
-		this.downloadTabFragmentTag = downloadTabFragmentTag;
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
