@@ -3,6 +3,7 @@ package com.youzik.app;
 import java.util.Locale;
 
 import com.youzik.app.fragments.*;
+import com.youzik.app.fragments.handlers.RequestDownloadHandler;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
@@ -15,7 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 
 public class MainActivity extends FragmentActivity implements
-		ActionBar.TabListener {
+		ActionBar.TabListener, RequestDownloadHandler {
 	
 	private String downloadTabFragmentTag = "";
 	
@@ -131,6 +132,13 @@ public class MainActivity extends FragmentActivity implements
 
 	@Override
 	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+	}
+
+	@Override
+	public void handleRequestDownload(String url) {
+		mViewPager.setCurrentItem(SectionsPagerAdapter.DOWNLOAD_TAB);
+		DownloadTabFragment downloadTab = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(getDownloadTabFragmentTag());
+		downloadTab.startDownloading(url);
 	}
 
 }

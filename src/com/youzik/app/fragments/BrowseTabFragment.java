@@ -1,7 +1,7 @@
 package com.youzik.app.fragments;
 
-import com.youzik.app.MainActivity;
 import com.youzik.app.R;
+import com.youzik.app.fragments.handlers.RequestDownloadHandler;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,11 +27,7 @@ public class BrowseTabFragment extends Fragment {
 	            if (!url.endsWith(".mp3"))
 	            	return super.shouldOverrideUrlLoading(view, url);
 	            
-	            if (getActivity() != null) {
-                	String downloadTabFragmentTag = ((MainActivity) BrowseTabFragment.this.getActivity()).getDownloadTabFragmentTag();
-                	DownloadTabFragment downloadTabFragment = (DownloadTabFragment) BrowseTabFragment.this.getActivity().getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
-                	downloadTabFragment.startDownloading(url);
-	            }
+	            ((RequestDownloadHandler) BrowseTabFragment.this.getActivity()).handleRequestDownload(url);
                 return true;
 	        }
 		});
