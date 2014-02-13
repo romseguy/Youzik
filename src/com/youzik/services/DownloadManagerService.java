@@ -44,7 +44,6 @@ public class DownloadManagerService extends IntentService {
 		
 		// wait for the download to start
 		while (status == DownloadManager.STATUS_PENDING) {
-			SystemClock.sleep(1000);
 			cursor = downloadManager.query(q);
 			
 			if (cursor.moveToFirst())
