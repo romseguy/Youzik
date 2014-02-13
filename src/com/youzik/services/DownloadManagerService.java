@@ -8,7 +8,6 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.SystemClock;
 import android.util.Log;
 
 public class DownloadManagerService extends IntentService {
@@ -42,7 +41,7 @@ public class DownloadManagerService extends IntentService {
 		
 		int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
 		
-		// wait for the download to start
+		// wait for download to start
 		while (status == DownloadManager.STATUS_PENDING) {
 			cursor = downloadManager.query(q);
 			

@@ -1,7 +1,9 @@
 package com.youzik.app.fragments;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.youzik.app.MainActivity;
 import com.youzik.app.R;
@@ -25,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -54,15 +57,17 @@ public class DownloadTabFragment extends ListFragment {
 		}
 		
 	}
-
-	private ProgressBar progressBar;
 	
 	public class ProgressAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 		private Context context;
+		private Download currentDownload;
+		private ProgressBar currentProgressBar;
 
-		public ProgressAsyncTask(Context context) {
+		public ProgressAsyncTask(Context context, long downloadId) {
 			this.context = context;
+			this.currentDownload = DownloadTabFragment.this.currentDownloads.get(downloadId);
+			this.currentProgressBar = DownloadTabFragment.this.currentProgressBars.get(downloadId);
 		}
 
 		@Override
@@ -73,15 +78,14 @@ public class DownloadTabFragment extends ListFragment {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			DownloadTabFragment.this.currentDownload = null;
-			DownloadTabFragment.this.updateList();
+			DownloadTabFragment.this.progressBarsLayout.removeView(this.currentProgressBar);
 		}
 
 		@Override
-		protected Void doInBackground(Void... arg0) {			
+		protected Void doInBackground(Void... arg0) {
             DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             DownloadManager.Query q = new DownloadManager.Query();
-            q.setFilterById(DownloadTabFragment.this.currentDownload.getId());
+            q.setFilterById(this.currentDownload.getId());
 			Cursor cursor = downloadManager.query(q);
 			
 			if (!cursor.moveToFirst()) {
@@ -94,8 +98,6 @@ public class DownloadTabFragment extends ListFragment {
             int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
 			
 			while (progress < 100) {
-	            Log.v("ProgressAsyncTask", bytes_downloaded + "/" + bytes_total + "=" + 100.0 * bytes_downloaded / bytes_total);
-	            
 	            if (bytes_total > 0) {
 	            	progress = (int) 100.0 * bytes_downloaded / bytes_total;
 	            	publishProgress(progress);
@@ -117,28 +119,31 @@ public class DownloadTabFragment extends ListFragment {
 
 		@Override
 		protected void onProgressUpdate(Integer... values) {
-			progressBar.setProgress(values[0]);
+			this.currentProgressBar.setProgress(values[0]);
 		}
 
 	}
 	
-	private List<Download> data;
-	private Download currentDownload = null;
+	private List<Download> completedDownloads;
+	private LinearLayout progressBarsLayout;
 
+	/*
+	 * Display section
+	 */
 	private void createList() {
-		this.data = new ArrayList<Download>();
-		this.adapter = new DownloadsAdapter(this.getActivity(), this.data);
+		this.completedDownloads = new ArrayList<Download>();
+		this.adapter = new DownloadsAdapter(this.getActivity(), this.completedDownloads);
 		this.setListAdapter(this.adapter);
 		this.updateList();
 	}
 	
 	public void updateList() {
-		if (this.data == null || this.adapter == null)
+		if (this.completedDownloads == null || this.adapter == null)
 			this.createList();
 		
 		DownloadDatabase db = new DownloadDatabase(this.getActivity());
-		this.data.clear();
-		this.data.addAll(db.getDownloads());
+		this.completedDownloads.clear();
+		this.completedDownloads.addAll(db.getDownloads());
 		this.adapter.notifyDataSetChanged();
 	}
 	
@@ -152,9 +157,15 @@ public class DownloadTabFragment extends ListFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		((MainActivity) getActivity()).setDownloadTabFragmentTag(getTag());
 		View downloadTabView = inflater.inflate(R.layout.download_tab, container, false);
-		this.progressBar = (ProgressBar) downloadTabView.findViewById(R.id.progressbar);
+		this.progressBarsLayout = (LinearLayout) downloadTabView.findViewById(R.id.progressbars);
 		return downloadTabView;
 	}
+	
+	/*
+	 * Downloading section
+	 */
+	private Map<Long, Download> currentDownloads = new HashMap<Long, Download>();
+	private Map<Long, ProgressBar> currentProgressBars = new HashMap<Long, ProgressBar>();
 	
     public void startDownloading(String url) {
     	Intent service = new Intent(this.getActivity(), DownloadManagerService.class);
@@ -164,11 +175,29 @@ public class DownloadTabFragment extends ListFragment {
     
 	private BroadcastReceiver downloadStartedReceiver = new BroadcastReceiver() {
 		@Override
+		public void onReceive(final Context context, Intent intent) {
+			final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
+			DownloadTabFragment.this.currentDownloads.put(d.getId(), d);
+			
+			// get a new progressbar layout element
+			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			ProgressBar p = (ProgressBar) layoutInflater.inflate(R.layout.download_progressbar, null);
+			
+			// and add it to the progressbars layout
+			DownloadTabFragment.this.progressBarsLayout.addView(p);
+			currentProgressBars.put(d.getId(), p);
+			new ProgressAsyncTask(context, d.getId()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+	};
+	
+	private BroadcastReceiver downloadCompletedReceiver = new BroadcastReceiver() {
+		@Override
 		public void onReceive(Context context, Intent intent) {
-			DownloadTabFragment.this.currentDownload = intent.getParcelableExtra(DownloadManagerService.DATA);
+			long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+			
 			DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
-			db.insertDownload(DownloadTabFragment.this.currentDownload);
-			new ProgressAsyncTask(context).execute();
+			db.insertDownload(DownloadTabFragment.this.currentDownloads.remove(downloadId));
+			DownloadTabFragment.this.updateList();
 		}
 	};
 	
@@ -177,12 +206,17 @@ public class DownloadTabFragment extends ListFragment {
 		IntentFilter intentFilter = new IntentFilter(DownloadManagerService.ACTION_DOWNLOAD_STARTED);
 		intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
 		this.getActivity().registerReceiver(this.downloadStartedReceiver, intentFilter);
+		
+		intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+		intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+		this.getActivity().registerReceiver(this.downloadCompletedReceiver, intentFilter);
 		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
 		this.getActivity().unregisterReceiver(this.downloadStartedReceiver);
+		this.getActivity().unregisterReceiver(this.downloadCompletedReceiver);
 		super.onPause();
 	}
 

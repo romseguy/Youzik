@@ -18,16 +18,6 @@ import android.view.Menu;
 public class MainActivity extends FragmentActivity implements
 		ActionBar.TabListener, RequestDownloadHandler {
 	
-	private String downloadTabFragmentTag = "";
-	
-	public String getDownloadTabFragmentTag() {
-		return downloadTabFragmentTag;
-	}
-
-	public void setDownloadTabFragmentTag(String downloadTabFragmentTag) {
-		this.downloadTabFragmentTag = downloadTabFragmentTag;
-	}
-	
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -133,11 +123,17 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
+	
+	private String downloadTabFragmentTag = "";
+
+	public void setDownloadTabFragmentTag(String downloadTabFragmentTag) {
+		this.downloadTabFragmentTag = downloadTabFragmentTag;
+	}
 
 	@Override
 	public void handleRequestDownload(String url) {
 		mViewPager.setCurrentItem(SectionsPagerAdapter.DOWNLOAD_TAB);
-		DownloadTabFragment downloadTab = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(getDownloadTabFragmentTag());
+		DownloadTabFragment downloadTab = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
 		downloadTab.startDownloading(url);
 	}
 
