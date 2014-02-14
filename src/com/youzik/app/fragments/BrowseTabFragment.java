@@ -34,6 +34,8 @@ public class BrowseTabFragment extends Fragment {
 		
 		if (this.webViewBundle == null) {
 			this.webView.loadUrl("http://tuto-geek.com/sample.html");
+			this.webView.getSettings();
+			this.webView.setBackgroundColor(0);
 		} else {
 			this.webView.restoreState(webViewBundle);
 		}

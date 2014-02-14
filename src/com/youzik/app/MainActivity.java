@@ -5,7 +5,6 @@ import java.util.Locale;
 import com.youzik.app.entities.Download;
 import com.youzik.app.entities.database.DownloadDatabase;
 import com.youzik.app.fragments.*;
-import com.youzik.app.fragments.handlers.InsertCompletedDownloadHandler;
 import com.youzik.app.fragments.handlers.RequestDownloadHandler;
 import com.youzik.app.fragments.handlers.RequestPlayDownloadHandler;
 
@@ -17,11 +16,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 
 public class MainActivity extends FragmentActivity implements
-		ActionBar.TabListener, RequestDownloadHandler, RequestPlayDownloadHandler,
-		InsertCompletedDownloadHandler {
+		ActionBar.TabListener, RequestDownloadHandler, RequestPlayDownloadHandler {
 	
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	
@@ -139,21 +138,12 @@ public class MainActivity extends FragmentActivity implements
 		DownloadTabFragment f = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(getFragmentTag(SectionsPagerAdapter.DOWNLOAD_TAB));
 		f.startDownload(url);
 	}
-	
-	@Override
-	public void handleInsertCompletedDownload(Download d) {
-		DownloadDatabase db = new DownloadDatabase(this);
-		db.insertDownload(d);
-		
-		DownloadTabFragment f = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(getFragmentTag(SectionsPagerAdapter.DOWNLOAD_TAB));
-		f.updateList();
-	}
 
 	@Override
-	public void handleRequestPlay(Download d) {
+	public void handleRequestPlayDownload(Download d) {
 		mViewPager.setCurrentItem(SectionsPagerAdapter.PLAY_TAB);
 		PlayTabFragment f = (PlayTabFragment) getSupportFragmentManager().findFragmentByTag(getFragmentTag(SectionsPagerAdapter.PLAY_TAB));
-		f.playSong(d);
+		f.playDownload(d);
 	}
 
 }

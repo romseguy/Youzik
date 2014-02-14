@@ -8,9 +8,9 @@ import java.util.Map;
 import com.youzik.app.R;
 import com.youzik.app.entities.Download;
 import com.youzik.app.entities.database.DownloadDatabase;
-import com.youzik.services.DownloadManagerService;
-import com.youzik.app.fragments.handlers.InsertCompletedDownloadHandler;
 import com.youzik.app.fragments.handlers.RequestPlayDownloadHandler;
+import com.youzik.app.services.DownloadManagerService;
+import com.youzik.app.services.MediaPlayerService;
 
 import android.app.Activity;
 import android.app.DownloadManager;
@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,21 +43,34 @@ public class DownloadTabFragment extends ListFragment {
 		}
 
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
 				LayoutInflater inflater = ((Activity) this.getContext()).getLayoutInflater();
                 convertView = inflater.inflate(R.layout.download_item, parent, false);
 			}
 			
-			/* display item content on download_item layout */
 			final Download item = this.getItem(position);
 			TextView name = (TextView) convertView.findViewById(R.id.download_item_name);
-			name.setText(item.getName());
+			name.setText(this.getItem(position).getName());
 			
 			convertView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					((RequestPlayDownloadHandler) DownloadTabFragment.this.getActivity()).handleRequestPlay(item);
+					Log.v("DownloadTabFragment", "onClick() called at position=" + position);
+					
+					((RequestPlayDownloadHandler) DownloadTabFragment.this.getActivity()).handleRequestPlayDownload(item);
+				}
+			});
+			
+			convertView.setOnLongClickListener(new View.OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					Log.v("DownloadTabFragment", "onLongClick() called at position=" + position);
+					
+					Intent intent = new Intent(MediaPlayerService.ACTION_QUEUE_TRACK);
+	        		intent.putExtra(DownloadManagerService.DATA, item);
+	                DownloadTabFragment.this.getActivity().sendBroadcast(intent);
+	                return true;
 				}
 			});
 			
@@ -164,6 +178,7 @@ public class DownloadTabFragment extends ListFragment {
 	@Override
     public void onActivityCreated(Bundle savedInstanceState) {
     	super.onActivityCreated(savedInstanceState);
+    	
     	this.createList();
     }
 	
@@ -207,7 +222,10 @@ public class DownloadTabFragment extends ListFragment {
 			if (d == null)
 				return;
 			
-			((InsertCompletedDownloadHandler) DownloadTabFragment.this.getActivity()).handleInsertCompletedDownload(d);
+			// we insert the download removed from currentDownloads into completedDownloads
+			DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
+			db.insertDownload(d);
+			DownloadTabFragment.this.updateList();
 		}
 	};
 	
@@ -229,5 +247,5 @@ public class DownloadTabFragment extends ListFragment {
 		this.getActivity().unregisterReceiver(this.downloadCompletedReceiver);
 		super.onPause();
 	}
-
+	
 }
