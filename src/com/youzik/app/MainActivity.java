@@ -3,7 +3,9 @@ package com.youzik.app;
 import java.util.Locale;
 
 import com.youzik.app.entities.Download;
+import com.youzik.app.entities.database.DownloadDatabase;
 import com.youzik.app.fragments.*;
+import com.youzik.app.fragments.handlers.InsertCompletedDownloadHandler;
 import com.youzik.app.fragments.handlers.RequestDownloadHandler;
 import com.youzik.app.fragments.handlers.RequestPlayDownloadHandler;
 
@@ -18,7 +20,8 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 
 public class MainActivity extends FragmentActivity implements
-		ActionBar.TabListener, RequestDownloadHandler, RequestPlayDownloadHandler {
+		ActionBar.TabListener, RequestDownloadHandler, RequestPlayDownloadHandler,
+		InsertCompletedDownloadHandler {
 	
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	
@@ -126,28 +129,31 @@ public class MainActivity extends FragmentActivity implements
 	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 	
-	private String downloadTabFragmentTag = "", playTabFragmentTag = "";
-
-	public void setDownloadTabFragmentTag(String downloadTabFragmentTag) {
-		this.downloadTabFragmentTag = downloadTabFragmentTag;
-	}
-	
-	public void setPlayTabFragmentTag(String playTabFragmentTag) {
-		this.playTabFragmentTag = playTabFragmentTag;
-	}
+	private String getFragmentTag(int item) {
+        return "android:switcher:" + R.id.pager + ":" + item;
+    }
 
 	@Override
 	public void handleRequestDownload(String url) {
 		mViewPager.setCurrentItem(SectionsPagerAdapter.DOWNLOAD_TAB);
-		DownloadTabFragment downloadTab = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
-		downloadTab.startDownloading(url);
+		DownloadTabFragment f = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(getFragmentTag(SectionsPagerAdapter.DOWNLOAD_TAB));
+		f.startDownload(url);
+	}
+	
+	@Override
+	public void handleInsertCompletedDownload(Download d) {
+		DownloadDatabase db = new DownloadDatabase(this);
+		db.insertDownload(d);
+		
+		DownloadTabFragment f = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(getFragmentTag(SectionsPagerAdapter.DOWNLOAD_TAB));
+		f.updateList();
 	}
 
 	@Override
 	public void handleRequestPlay(Download d) {
 		mViewPager.setCurrentItem(SectionsPagerAdapter.PLAY_TAB);
-		PlayTabFragment playTab = (PlayTabFragment) getSupportFragmentManager().findFragmentByTag(playTabFragmentTag);
-		playTab.playSong(d);
+		PlayTabFragment f = (PlayTabFragment) getSupportFragmentManager().findFragmentByTag(getFragmentTag(SectionsPagerAdapter.PLAY_TAB));
+		f.playSong(d);
 	}
 
 }

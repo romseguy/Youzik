@@ -35,7 +35,7 @@ public class DownloadManagerService extends IntentService {
 		Cursor cursor = downloadManager.query(q);
 
 		if (!cursor.moveToFirst()) {
-			Log.v("DownloadManagerService", "download list is empty");
+			Log.d("DownloadManagerService", "download list is empty");
 			return;
 		}
 		
@@ -51,17 +51,18 @@ public class DownloadManagerService extends IntentService {
 		}
 		
 		if (status == DownloadManager.STATUS_RUNNING) {
-			Download dl = new Download();
-			dl.setId(cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID)));
-			dl.setName(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)));
-			dl.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME)));
-			cursor.close();
+			String downloadName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE));
+			
+			Download d = new Download();
+			d.setId(cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID)));
+			d.setName(downloadName.substring(0, (downloadName.length() - 4)));
+			d.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME)));
 			
 			// notifiy the BroadcastReceiver downloadStartedReceiver that the download has started
 			Intent intent = new Intent();
 			intent.setAction(ACTION_DOWNLOAD_STARTED);
 			intent.addCategory(Intent.CATEGORY_DEFAULT);
-			intent.putExtra(DownloadManagerService.DATA, dl);
+			intent.putExtra(DownloadManagerService.DATA, d);
 		    sendBroadcast(intent);
 		}
 		
