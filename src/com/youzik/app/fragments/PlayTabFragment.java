@@ -1,11 +1,6 @@
 package com.youzik.app.fragments;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-
-import com.youzik.app.MainActivity;
 import com.youzik.app.R;
 import com.youzik.app.entities.Download;
 import com.youzik.app.helpers.Convert;
@@ -22,19 +17,19 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class PlayTabFragment extends Fragment implements
 		OnCompletionListener, SeekBar.OnSeekBarChangeListener {
 	
+	View playTabView;
 	private ImageButton btnPlay;
 	private ImageButton btnForward;
 	private ImageButton btnBackward;
 	//private ImageButton btnNext;
 	//private ImageButton btnPrevious;
 	//private ImageButton btnPlaylist;
-	private ImageButton btnRepeat;
-	private ImageButton btnShuffle;
+	//private ImageButton btnRepeat;
+	//private ImageButton btnShuffle;
 	private SeekBar songProgressBar;
 	private TextView songTitleLabel;
 	private TextView songCurrentDurationLabel;
@@ -48,14 +43,35 @@ public class PlayTabFragment extends Fragment implements
 	private int seekForwardTime = 5000; // ms
 	private int seekBackwardTime = 5000; // ms
 	//private int currentSongIndex = 0; 
-	private boolean isShuffle = false;
-	private boolean isRepeat = false;
+	//private boolean isShuffle = false;
+	//private boolean isRepeat = false;
+	
+	private Runnable mUpdateTimeTask = new Runnable() {
+	   public void run() {
+		   if (mp == null)
+			   return;
+		   
+		   long totalDuration = mp.getDuration();
+		   long currentDuration = mp.getCurrentPosition();
+		  
+		   // Displaying Total Duration time
+		   songTotalDurationLabel.setText(""+Convert.milliSecondsToTimer(totalDuration));
+		   // Displaying time completed playing
+		   songCurrentDurationLabel.setText(""+Convert.milliSecondsToTimer(currentDuration));
+		   
+		   // Updating progress bar
+		   int progress = (int)(Convert.getProgressPercentage(currentDuration, totalDuration));
+		   //Log.d("Progress", ""+progress);
+		   songProgressBar.setProgress(progress);
+		   
+		   // Running this thread after 100 milliseconds
+	       mHandler.postDelayed(this, 100);
+	   }
+	};
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		((MainActivity) getActivity()).setPlayTabFragmentTag(getTag());
-		
-		View playTabView = inflater.inflate(R.layout.play_tab, container, false);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {		
+		playTabView = inflater.inflate(R.layout.play_tab, container, false);
 		this.btnPlay = (ImageButton) playTabView.findViewById(R.id.btnPlay);
 		this.btnForward = (ImageButton) playTabView.findViewById(R.id.btnForward);
 		this.btnBackward = (ImageButton) playTabView.findViewById(R.id.btnBackward);
@@ -81,12 +97,14 @@ public class PlayTabFragment extends Fragment implements
 		btnPlay.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				if (mp == null) return;
+				if (mp == null)
+					return;
 				
 				if (mp.isPlaying()) {
 					mp.pause();
 					btnPlay.setImageResource(R.drawable.btn_play);
 				} else {
+					mp.start();
 					btnPlay.setImageResource(R.drawable.btn_pause);
 				}
 			}
@@ -95,7 +113,8 @@ public class PlayTabFragment extends Fragment implements
 		btnForward.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				if (mp == null) return;
+				if (mp == null)
+					return;
 				
 				int currentPosition = mp.getCurrentPosition();
 				
@@ -202,45 +221,18 @@ public class PlayTabFragment extends Fragment implements
 		});*/
 	}
 	
+    @Override
+    public void onPause() {
+    	mHandler.removeCallbacks(mUpdateTimeTask);
+		super.onPause();
+    }
+	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		mp.release();
 	}
-	
-	private Runnable mUpdateTimeTask = new Runnable() {
-	   public void run() {
-		   long totalDuration = mp.getDuration();
-		   long currentDuration = mp.getCurrentPosition();
-		  
-		   // Displaying Total Duration time
-		   songTotalDurationLabel.setText(""+Convert.milliSecondsToTimer(totalDuration));
-		   // Displaying time completed playing
-		   songCurrentDurationLabel.setText(""+Convert.milliSecondsToTimer(currentDuration));
-		   
-		   // Updating progress bar
-		   int progress = (int)(Convert.getProgressPercentage(currentDuration, totalDuration));
-		   //Log.d("Progress", ""+progress);
-		   songProgressBar.setProgress(progress);
-		   
-		   // Running this thread after 100 milliseconds
-	       mHandler.postDelayed(this, 100);
-	   }
-	};
-	
-	/**
-	 * Receiving song index from playlist view and play the song
-	 * */
-	/*@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
 		
-		if (resultCode == 100) {
-			currentSongIndex = data.getExtras().getInt("songIndex");
-			playSong(currentSongIndex);
-		}
-	}*/
-	
 	public void playSong(Download d) {
 		try {
 			mp.reset();
@@ -248,7 +240,7 @@ public class PlayTabFragment extends Fragment implements
 			mp.prepare();
 			mp.start();
 			
-			songTitleLabel.setText(d.getName().substring(0, (d.getName().length() - 4)));
+			songTitleLabel.setText(d.getName());
 			btnPlay.setImageResource(R.drawable.btn_pause);
 			
 			songProgressBar.setProgress(0);
@@ -267,11 +259,24 @@ public class PlayTabFragment extends Fragment implements
         mHandler.postDelayed(mUpdateTimeTask, 100);        
     }
 	
+	/**
+	 * Receiving song index from playlist view and play the song
+	 * */
+	/*@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (resultCode == 100) {
+			currentSongIndex = data.getExtras().getInt("songIndex");
+			playSong(currentSongIndex);
+		}
+	}*/
+	
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
 		mp.pause();
-		btnPlay.setImageResource(R.drawable.btn_play);
 		mp.seekTo(0);
+		mp.start();
 		songProgressBar.setProgress(0);
 		updateProgressBar();
 		// check for repeat is ON or OFF
@@ -320,5 +325,5 @@ public class PlayTabFragment extends Fragment implements
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {		
 	}
-
+	
 }

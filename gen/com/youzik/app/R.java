@@ -64,11 +64,12 @@ public final class R {
         public static final int track_info_bg=0x7f020028;
     }
     public static final class id {
-        public static final int action_settings=0x7f080011;
+        public static final int action_settings=0x7f080012;
         public static final int browse_tab=0x7f080001;
         public static final int btnBackward=0x7f08000a;
         public static final int btnForward=0x7f08000c;
         public static final int btnPlay=0x7f08000b;
+        public static final int btnRepeat=0x7f080011;
         public static final int download_item_name=0x7f080003;
         public static final int pager=0x7f080000;
         public static final int player_footer_bg=0x7f080009;

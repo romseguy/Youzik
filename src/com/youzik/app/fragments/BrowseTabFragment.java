@@ -19,26 +19,26 @@ public class BrowseTabFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.browse_tab, container, false);
-		webView = (WebView) ll.findViewById(R.id.webView);
-		webView.setWebViewClient(new WebViewClient() {
+		LinearLayout browseTabView = (LinearLayout) inflater.inflate(R.layout.browse_tab, container, false);
+		this.webView = (WebView) browseTabView.findViewById(R.id.webView);
+		this.webView.setWebViewClient(new WebViewClient() {
 	        @Override
 	        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-	            if (!url.endsWith(".mp3"))
-	            	return super.shouldOverrideUrlLoading(view, url);
-	            
-	            ((RequestDownloadHandler) BrowseTabFragment.this.getActivity()).handleRequestDownload(url);
-                return true;
+	            if (url.endsWith(".mp3")) {
+	            	((RequestDownloadHandler) BrowseTabFragment.this.getActivity()).handleRequestDownload(url);
+	                return true;
+	            }
+	            return super.shouldOverrideUrlLoading(view, url);
 	        }
 		});
 		
-		if (webViewBundle == null) {
-		    webView.loadUrl("http://tuto-geek.com/sample.html");
+		if (this.webViewBundle == null) {
+			this.webView.loadUrl("http://tuto-geek.com/sample.html");
 		} else {
-		    webView.restoreState(webViewBundle);
+			this.webView.restoreState(webViewBundle);
 		}
 		
-		return ll;
+		return browseTabView;
 	}
 	
 	/**
@@ -51,8 +51,8 @@ public class BrowseTabFragment extends Fragment {
     public void onPause() {
 		super.onPause();
 	
-		webViewBundle = new Bundle();
-		webView.saveState(webViewBundle);
+		this.webViewBundle = new Bundle();
+		this.webView.saveState(this.webViewBundle);
     }
 
 }
