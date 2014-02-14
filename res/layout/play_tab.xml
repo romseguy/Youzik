@@ -69,12 +69,12 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp">
             <!-- Previous Button -->
-            <ImageButton
+            <!-- <ImageButton
                 android:id="@+id/btnPrevious" 
                 android:src="@drawable/btn_previous"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@null"/>
+                android:background="@null"/>-->
             <!-- Backward Button -->
             <ImageButton 
                 android:id="@+id/btnBackward"
@@ -97,12 +97,12 @@
                 android:layout_height="wrap_content"
                 android:background="@null"/>
             <!-- Next Button -->
-            <ImageButton 
+            <!-- <ImageButton 
                 android:id="@+id/btnNext"
                 android:src="@drawable/btn_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@null"/>
+                android:background="@null"/>-->
         </LinearLayout>
     </LinearLayout>
     
@@ -156,21 +156,21 @@
         android:layout_above="@id/timerDisplay"
         android:gravity="center">
         <!-- Repeat Button -->
-        <ImageButton 
+        <!-- <ImageButton 
             android:id="@+id/btnRepeat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/btn_repeat"
             android:layout_marginRight="5dp"
-            android:background="@null"/>
+            android:background="@null"/>-->
         
         <!-- Shuffle Button -->        
-         <ImageButton 
+        <!-- <ImageButton 
             android:id="@+id/btnShuffle" 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/btn_shuffle"
             android:layout_marginLeft="5dp"
-            android:background="@null"/>
+            android:background="@null"/>-->
     </LinearLayout>
 </RelativeLayout>

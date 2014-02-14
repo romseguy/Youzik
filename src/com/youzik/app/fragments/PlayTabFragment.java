@@ -1,10 +1,13 @@
 package com.youzik.app.fragments;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import com.youzik.app.MainActivity;
 import com.youzik.app.R;
+import com.youzik.app.entities.Download;
 import com.youzik.app.helpers.Convert;
 
 import android.media.MediaPlayer;
@@ -12,6 +15,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,8 +30,8 @@ public class PlayTabFragment extends Fragment implements
 	private ImageButton btnPlay;
 	private ImageButton btnForward;
 	private ImageButton btnBackward;
-	private ImageButton btnNext;
-	private ImageButton btnPrevious;
+	//private ImageButton btnNext;
+	//private ImageButton btnPrevious;
 	//private ImageButton btnPlaylist;
 	private ImageButton btnRepeat;
 	private ImageButton btnShuffle;
@@ -38,14 +42,34 @@ public class PlayTabFragment extends Fragment implements
 	
 	private MediaPlayer mp;
 	private Handler mHandler = new Handler();
-	private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
+	//private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
 	//private SongsManager songManager;
 	
 	private int seekForwardTime = 5000; // ms
 	private int seekBackwardTime = 5000; // ms
-	private int currentSongIndex = 0; 
+	//private int currentSongIndex = 0; 
 	private boolean isShuffle = false;
 	private boolean isRepeat = false;
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		((MainActivity) getActivity()).setPlayTabFragmentTag(getTag());
+		
+		View playTabView = inflater.inflate(R.layout.play_tab, container, false);
+		this.btnPlay = (ImageButton) playTabView.findViewById(R.id.btnPlay);
+		this.btnForward = (ImageButton) playTabView.findViewById(R.id.btnForward);
+		this.btnBackward = (ImageButton) playTabView.findViewById(R.id.btnBackward);
+		//this.btnNext = (ImageButton) playTabView.findViewById(R.id.btnNext);
+		//this.btnPrevious = (ImageButton) playTabView.findViewById(R.id.btnPrevious);
+		//this.btnPlaylist = (ImageButton) playTabView.findViewById(R.id.btnPlaylist);
+		//this.btnRepeat = (ImageButton) playTabView.findViewById(R.id.btnRepeat);
+		//this.btnShuffle = (ImageButton) playTabView.findViewById(R.id.btnShuffle);
+		this.songProgressBar = (SeekBar) playTabView.findViewById(R.id.songProgressBar);
+		this.songTitleLabel = (TextView) playTabView.findViewById(R.id.songTitle);
+		this.songCurrentDurationLabel = (TextView) playTabView.findViewById(R.id.songCurrentDurationLabel);
+		this.songTotalDurationLabel = (TextView) playTabView.findViewById(R.id.songTotalDurationLabel);
+		return playTabView;
+	}
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -71,6 +95,8 @@ public class PlayTabFragment extends Fragment implements
 		btnForward.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				if (mp == null) return;
+				
 				int currentPosition = mp.getCurrentPosition();
 				
 				// check if seekForward time is lesser than song duration
@@ -99,7 +125,7 @@ public class PlayTabFragment extends Fragment implements
 			}
 		});
 		
-		btnNext.setOnClickListener(new View.OnClickListener() {
+		/*btnNext.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				// check if next song is there or not
@@ -160,7 +186,7 @@ public class PlayTabFragment extends Fragment implements
 					btnRepeat.setImageResource(R.drawable.btn_repeat);
 				}
 			}
-		});
+		});*/
 		
 		/**
 		 * Button Click event for Play list click event Launches list activity
@@ -174,24 +200,6 @@ public class PlayTabFragment extends Fragment implements
 				startActivityForResult(i, 100);
 			}
 		});*/
-	}
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View playTabView = inflater.inflate(R.layout.play_tab, container, false);
-		this.btnPlay = (ImageButton) playTabView.findViewById(R.id.btnPlay);
-		this.btnForward = (ImageButton) playTabView.findViewById(R.id.btnForward);
-		this.btnBackward = (ImageButton) playTabView.findViewById(R.id.btnBackward);
-		this.btnNext = (ImageButton) playTabView.findViewById(R.id.btnNext);
-		this.btnPrevious = (ImageButton) playTabView.findViewById(R.id.btnPrevious);
-		//this.btnPlaylist = (ImageButton) playTabView.findViewById(R.id.btnPlaylist);
-		this.btnRepeat = (ImageButton) playTabView.findViewById(R.id.btnRepeat);
-		this.btnShuffle = (ImageButton) playTabView.findViewById(R.id.btnShuffle);
-		this.songProgressBar = (SeekBar) playTabView.findViewById(R.id.songProgressBar);
-		this.songTitleLabel = (TextView) playTabView.findViewById(R.id.songTitle);
-		this.songCurrentDurationLabel = (TextView) playTabView.findViewById(R.id.songCurrentDurationLabel);
-		this.songTotalDurationLabel = (TextView) playTabView.findViewById(R.id.songTotalDurationLabel);
-		return playTabView;
 	}
 	
 	@Override
@@ -233,21 +241,24 @@ public class PlayTabFragment extends Fragment implements
 		}
 	}*/
 	
-	public void playSong(int songIndex) {
+	public void playSong(Download d) {
 		try {
 			mp.reset();
-			mp.setDataSource(songsList.get(songIndex).get("songPath"));
+			mp.setDataSource(d.getUrl());
 			mp.prepare();
 			mp.start();
 			
-			String songTitle = songsList.get(songIndex).get("songTitle");
-			songTitleLabel.setText(songTitle);
+			songTitleLabel.setText(d.getName().substring(0, (d.getName().length() - 4)));
 			btnPlay.setImageResource(R.drawable.btn_pause);
 			
 			songProgressBar.setProgress(0);
 			songProgressBar.setMax(100);
 			updateProgressBar();
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -258,8 +269,13 @@ public class PlayTabFragment extends Fragment implements
 	
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
+		mp.pause();
+		btnPlay.setImageResource(R.drawable.btn_play);
+		mp.seekTo(0);
+		songProgressBar.setProgress(0);
+		updateProgressBar();
 		// check for repeat is ON or OFF
-		if (isRepeat) {
+		/*if (isRepeat) {
 			// repeat is on play same song again
 			playSong(currentSongIndex);
 		} else if (isShuffle) {
@@ -277,7 +293,7 @@ public class PlayTabFragment extends Fragment implements
 				playSong(0);
 				currentSongIndex = 0;
 			}
-		}
+		}*/
 	}
 
 	/**
