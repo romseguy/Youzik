@@ -23,15 +23,14 @@ public class DownloadDatabase {
         this.databaseHelper = DatabaseHelper.getInstance(context);
     }
     
-    public void insertDownload(Download dl) {
+    public void insertDownload(Download d) {
     	ContentValues values = new ContentValues();
-    	values.put(DatabaseHelper.DOWNLOAD_TABLE_FIELD_ID, dl.getId());
-    	values.put(DatabaseHelper.DOWNLOAD_TABLE_FIELD_NAME, dl.getName());
-    	values.put(DatabaseHelper.DOWNLOAD_TABLE_FIELD_URL, dl.getUrl());
+    	values.put(DatabaseHelper.DOWNLOAD_TABLE_FIELD_NAME, d.getName());
+    	values.put(DatabaseHelper.DOWNLOAD_TABLE_FIELD_URL, d.getUrl());
     	
     	SQLiteDatabase db = this.databaseHelper.getDatabase();
-    	db.insert(DatabaseHelper.DOWNLOAD_TABLE_NAME, null, values);
-    	db.query(DatabaseHelper.DOWNLOAD_TABLE_NAME, this.fields, DatabaseHelper.DOWNLOAD_TABLE_FIELD_ID + " = " + dl.getId(), null, null, null, null);
+    	long insertId = db.insert(DatabaseHelper.DOWNLOAD_TABLE_NAME, null, values);
+    	db.query(DatabaseHelper.DOWNLOAD_TABLE_NAME, this.fields, DatabaseHelper.DOWNLOAD_TABLE_FIELD_ID + " = " + insertId, null, null, null, null);
     	this.databaseHelper.closeDatabase();
     }
     
