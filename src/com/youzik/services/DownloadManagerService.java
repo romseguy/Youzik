@@ -42,7 +42,8 @@ public class DownloadManagerService extends IntentService {
 		int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
 		
 		// wait for download to start
-		while (status == DownloadManager.STATUS_PENDING) {
+		while (status == DownloadManager.STATUS_PENDING || "".equals(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)))) {
+			cursor.close();
 			cursor = downloadManager.query(q);
 			
 			if (cursor.moveToFirst())
@@ -53,7 +54,7 @@ public class DownloadManagerService extends IntentService {
 			Download dl = new Download();
 			dl.setId(cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID)));
 			dl.setName(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)));
-			dl.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+			dl.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME)));
 			cursor.close();
 			
 			// notifiy the BroadcastReceiver downloadStartedReceiver that the download has started

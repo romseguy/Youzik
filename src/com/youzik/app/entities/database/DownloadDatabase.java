@@ -23,14 +23,6 @@ public class DownloadDatabase {
         this.databaseHelper = DatabaseHelper.getInstance(context);
     }
     
-    private Download cursorToDownload(Cursor cursor) {
-    	Download download = new Download();
-    	download.setId(cursor.getLong(0));
-    	download.setName(cursor.getString(1));
-    	download.setUrl(cursor.getString(2));
-    	return download;
-    }
-    
     public void insertDownload(Download dl) {
     	ContentValues values = new ContentValues();
     	values.put(DatabaseHelper.DOWNLOAD_TABLE_FIELD_ID, dl.getId());
@@ -50,7 +42,11 @@ public class DownloadDatabase {
     	Cursor cursor = db.query(DatabaseHelper.DOWNLOAD_TABLE_NAME, this.fields, null, null, null, null, null);
     	cursor.moveToFirst();
     	while (!cursor.isAfterLast()) {
-    		downloads.add(this.cursorToDownload(cursor));
+    		Download d = new Download();
+        	d.setId(cursor.getLong(0));
+        	d.setName(cursor.getString(1));
+        	d.setUrl(cursor.getString(2));
+        	downloads.add(d);
     		cursor.moveToNext();
     	}
     	cursor.close();
