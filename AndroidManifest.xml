@@ -27,7 +27,12 @@
         </activity>
         
         <service
-            android:name="com.youzik.services.DownloadManagerService"
+            android:name="com.youzik.app.services.DownloadManagerService"
+            android:enabled="true"
+            android:exported="false" />
+        
+        <service
+            android:name="com.youzik.app.services.MediaPlayerService"
             android:enabled="true"
             android:exported="false" />
         
