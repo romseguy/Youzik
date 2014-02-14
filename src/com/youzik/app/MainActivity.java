@@ -2,8 +2,10 @@ package com.youzik.app;
 
 import java.util.Locale;
 
+import com.youzik.app.entities.Download;
 import com.youzik.app.fragments.*;
 import com.youzik.app.fragments.handlers.RequestDownloadHandler;
+import com.youzik.app.fragments.handlers.RequestPlayDownloadHandler;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
@@ -16,7 +18,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 
 public class MainActivity extends FragmentActivity implements
-		ActionBar.TabListener, RequestDownloadHandler {
+		ActionBar.TabListener, RequestDownloadHandler, RequestPlayDownloadHandler {
 	
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	
@@ -124,10 +126,14 @@ public class MainActivity extends FragmentActivity implements
 	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 	
-	private String downloadTabFragmentTag = "";
+	private String downloadTabFragmentTag = "", playTabFragmentTag = "";
 
 	public void setDownloadTabFragmentTag(String downloadTabFragmentTag) {
 		this.downloadTabFragmentTag = downloadTabFragmentTag;
+	}
+	
+	public void setPlayTabFragmentTag(String playTabFragmentTag) {
+		this.playTabFragmentTag = playTabFragmentTag;
 	}
 
 	@Override
@@ -135,6 +141,13 @@ public class MainActivity extends FragmentActivity implements
 		mViewPager.setCurrentItem(SectionsPagerAdapter.DOWNLOAD_TAB);
 		DownloadTabFragment downloadTab = (DownloadTabFragment) getSupportFragmentManager().findFragmentByTag(downloadTabFragmentTag);
 		downloadTab.startDownloading(url);
+	}
+
+	@Override
+	public void handleRequestPlay(Download d) {
+		mViewPager.setCurrentItem(SectionsPagerAdapter.PLAY_TAB);
+		PlayTabFragment playTab = (PlayTabFragment) getSupportFragmentManager().findFragmentByTag(playTabFragmentTag);
+		playTab.playSong(d);
 	}
 
 }
