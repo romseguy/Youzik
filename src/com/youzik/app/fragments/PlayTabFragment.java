@@ -66,19 +66,13 @@ public class PlayTabFragment extends Fragment {
         this.trackCurrentDurationLabel = (TextView) playTabView.findViewById(R.id.trackCurrentDurationLabel);
         this.trackTotalDurationLabel = (TextView) playTabView.findViewById(R.id.trackTotalDurationLabel);
         this.trackProgressBar = (SeekBar) playTabView.findViewById(R.id.trackProgressBar);
-        // this.btnForward = (ImageButton)
-        // playTabView.findViewById(R.id.btnForward);
-        // this.btnBackward = (ImageButton)
-        // playTabView.findViewById(R.id.btnBackward);
+        // this.btnForward = (ImageButton) playTabView.findViewById(R.id.btnForward);
+        // this.btnBackward = (ImageButton) playTabView.findViewById(R.id.btnBackward);
         // this.btnNext = (ImageButton) playTabView.findViewById(R.id.btnNext);
-        // this.btnPrevious = (ImageButton)
-        // playTabView.findViewById(R.id.btnPrevious);
-        // this.btnPlaylist = (ImageButton)
-        // playTabView.findViewById(R.id.btnPlaylist);
-        // this.btnRepeat = (ImageButton)
-        // playTabView.findViewById(R.id.btnRepeat);
-        // this.btnShuffle = (ImageButton)
-        // playTabView.findViewById(R.id.btnShuffle);
+        // this.btnPrevious = (ImageButton) playTabView.findViewById(R.id.btnPrevious);
+        // this.btnPlaylist = (ImageButton) playTabView.findViewById(R.id.btnPlaylist);
+        // this.btnRepeat = (ImageButton) playTabView.findViewById(R.id.btnRepeat);
+        // this.btnShuffle = (ImageButton) playTabView.findViewById(R.id.btnShuffle);
         return playTabView;
     }
 
@@ -100,102 +94,7 @@ public class PlayTabFragment extends Fragment {
                 updatePlayPauseButtonState();
             }
         });
-
-        /*
-         * btnForward.setOnClickListener(new View.OnClickListener() {
-         * 
-         * @Override public void onClick(View arg0) { if (mediaPlayer == null)
-         * return;
-         * 
-         * int currentPosition = mediaPlayerService.getCurrentPosition();
-         * 
-         * // check if seekForward time is lesser than song duration if
-         * (currentPosition + seekForwardTime <=
-         * mediaPlayerService.getDuration()) { // forward song
-         * mediaPlayer.seekTo(currentPosition + seekForwardTime); } else { //
-         * forward to end position
-         * mediaPlayer.seekTo(mediaPlayerService.getDuration()); } } });
-         * 
-         * btnBackward.setOnClickListener(new View.OnClickListener() {
-         * 
-         * @Override public void onClick(View arg0) { if (mediaPlayer == null)
-         * return;
-         * 
-         * int currentPosition = mediaPlayerService.getCurrentPosition(); //
-         * check if seekBackward time is greater than 0 sec if (currentPosition
-         * - seekBackwardTime >= 0) { // forward song
-         * mediaPlayer.seekTo(currentPosition - seekBackwardTime); } else { //
-         * backward to starting position mediaPlayer.seekTo(0); } } });
-         */
-
-        /*
-         * btnNext.setOnClickListener(new View.OnClickListener() {
-         * 
-         * @Override public void onClick(View arg0) { // check if next song is
-         * there or not if (currentSongIndex < (songsList.size() - 1)) {
-         * playSong(currentSongIndex + 1); currentSongIndex = currentSongIndex +
-         * 1; } else { // play first song playSong(0); currentSongIndex = 0; } }
-         * });
-         * 
-         * btnPrevious.setOnClickListener(new View.OnClickListener() {
-         * 
-         * @Override public void onClick(View arg0) { if (currentSongIndex > 0)
-         * { playSong(currentSongIndex - 1); currentSongIndex = currentSongIndex
-         * - 1; } else { // play last song playSong(songsList.size() - 1);
-         * currentSongIndex = songsList.size() - 1; } } });
-         */
-
-        /*
-         * btnRepeat.setOnClickListener(new View.OnClickListener() {
-         * 
-         * @Override public void onClick(View arg0) { if (isRepeat) { isRepeat =
-         * false; Toast.makeText(getActivity().getApplicationContext(),
-         * "Repeat is OFF", Toast.LENGTH_SHORT).show();
-         * btnRepeat.setImageResource(R.drawable.btn_repeat); } else { isRepeat
-         * = true; Toast.makeText(getActivity().getApplicationContext(),
-         * "Repeat is ON", Toast.LENGTH_SHORT).show(); //isShuffle = false;
-         * btnRepeat.setImageResource(R.drawable.btn_repeat_focused);
-         * //btnShuffle.setImageResource(R.drawable.btn_shuffle); } } });
-         */
-
-        /*
-         * btnShuffle.setOnClickListener(new View.OnClickListener() {
-         * 
-         * @Override public void onClick(View arg0) { if (isShuffle) { isShuffle
-         * = false; Toast.makeText(getActivity().getApplicationContext(),
-         * "Shuffle is OFF", Toast.LENGTH_SHORT).show();
-         * btnShuffle.setImageResource(R.drawable.btn_shuffle); } else {
-         * isShuffle = true;
-         * Toast.makeText(getActivity().getApplicationContext(),
-         * "Shuffle is ON", Toast.LENGTH_SHORT).show(); isRepeat = false;
-         * btnShuffle.setImageResource(R.drawable.btn_shuffle_focused);
-         * btnRepeat.setImageResource(R.drawable.btn_repeat); } } });
-         */
-
-        /**
-         * Button Click event for Play list click event Launches list activity
-         * which displays list of songs
-         */
-        /*
-         * btnPlaylist.setOnClickListener(new View.OnClickListener() {
-         * 
-         * @Override public void onClick(View arg0) { Intent i = new
-         * Intent(getActivity().getApplicationContext(),
-         * PlayListActivity.class); startActivityForResult(i, 100); } });
-         */
     }
-
-    /**
-     * Receiving song index from playlist view and play the song
-     */
-    /*
-     * @Override protected void onActivityResult(int requestCode, int
-     * resultCode, Intent data) { super.onActivityResult(requestCode,
-     * resultCode, data);
-     * 
-     * if (resultCode == 100) { currentSongIndex =
-     * data.getExtras().getInt("songIndex"); playSong(currentSongIndex); } }
-     */
 
     @Override
     public void onResume() {

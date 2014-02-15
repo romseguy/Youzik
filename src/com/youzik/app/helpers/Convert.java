@@ -3,9 +3,8 @@ package com.youzik.app.helpers;
 public class Convert {
 
     /**
-     * Function to convert milliseconds time to Timer Format
-     * Hours:Minutes:Seconds
-     * */
+     * Function to convert milliseconds time to Timer Format Hours:Minutes:Seconds
+     */
     public static String milliSecondsToTimer(long milliseconds) {
         String finalTimerString = "";
         String secondsString = "";
@@ -14,6 +13,7 @@ public class Convert {
         int hours = (int) (milliseconds / (1000 * 60 * 60));
         int minutes = (int) (milliseconds % (1000 * 60 * 60)) / (1000 * 60);
         int seconds = (int) ((milliseconds % (1000 * 60 * 60)) % (1000 * 60) / 1000);
+        
         // Add hours if there
         if (hours > 0) {
             finalTimerString = hours + ":";
@@ -35,12 +35,9 @@ public class Convert {
 
     /**
      * Function to change progress to timer
-     * 
-     * @param progress
-     *            -
-     * @param totalDuration
-     *            returns current duration in milliseconds
-     * */
+     * @param progress -
+     * @param totalDuration returns current duration in milliseconds
+     */
     public static int progressToTimer(int progress, int totalDuration) {
         int currentDuration = 0;
         totalDuration = (int) (totalDuration / 1000);

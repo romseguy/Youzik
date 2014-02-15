@@ -126,8 +126,7 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 
         Download d = queuedTracks.get(0);
 
-        // the media player is already instanciated and paused so we can play
-        // the track right away
+        // the media player is already instanciated and paused so we can play the track right away
         if (this.mediaPlayer != null && this.paused) {
             this.mediaPlayer.start();
             this.paused = false;

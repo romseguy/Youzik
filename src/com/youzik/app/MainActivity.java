@@ -79,8 +79,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the app.
+        // Create the adapter that will return a fragment for each of the three primary sections of the app.
         this.mSectionsPagerAdapter = new SectionsPagerAdapter(this.getSupportFragmentManager());
 
         // Set up the pager from the MainActivity layout with the adapter.
@@ -96,10 +95,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         // For each of the sections in the app, add a tab to the action bar.
         for (int i = 0; i < this.mSectionsPagerAdapter.getCount(); i++) {
-            // Create a tab with text corresponding to the page title defined by
-            // the adapter. Also specify this Activity object, which implements
-            // the TabListener interface, as the callback (listener) for when
-            // this tab is selected.
+            // Create a tab with text corresponding to the page title defined by the adapter. Also specify this Activity object, which implements the
+            // TabListener interface, as the callback (listener) for when this tab is selected.
             actionBar.addTab(actionBar.newTab().setText(this.mSectionsPagerAdapter.getPageTitle(i)).setTabListener(this));
         }
     }

@@ -46,8 +46,7 @@ public class BrowseTabFragment extends Fragment {
     }
 
     /**
-     * Saves the state of the webView in the webViewBundle. Called when the
-     * Fragment is going into the background so it can be restored in the
+     * Saves the state of the webView in the webViewBundle. Called when the Fragment is going into the background so it can be restored in the
      * onCreateView method when going back to the browse tab.
      */
     @Override

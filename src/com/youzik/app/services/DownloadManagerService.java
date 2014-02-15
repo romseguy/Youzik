@@ -22,8 +22,7 @@ public class DownloadManagerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent service) {
-        // send the HTTP request to start the download with the url provided by
-        // the intent data
+        // send the HTTP request to start the download with the url provided by the intent data
         Request request = new Request(Uri.parse(service.getStringExtra(URL)));
 
         // append the download to the Android's download manager
@@ -59,8 +58,7 @@ public class DownloadManagerService extends IntentService {
             d.setName(downloadName.substring(0, (downloadName.length() - 4)));
             d.setUrl(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME)));
 
-            // notifiy the BroadcastReceiver downloadStartedReceiver that the
-            // download has started
+            // notifiy the BroadcastReceiver downloadStartedReceiver that the download has started
             Intent intent = new Intent();
             intent.setAction(ACTION_DOWNLOAD_STARTED);
             intent.putExtra(DownloadManagerService.DATA, d);

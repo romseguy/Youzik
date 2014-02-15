@@ -41,8 +41,7 @@ public class Download implements Parcelable {
     }
 
     /**
-     * @param id
-     *            the id to set
+     * @param id the id to set
      */
     public void setId(long id) {
         this.id = id;
@@ -56,8 +55,7 @@ public class Download implements Parcelable {
     }
 
     /**
-     * @param name
-     *            the name to set
+     * @param name the name to set
      */
     public void setName(String name) {
         this.name = "".equals(name) ? "Unknown download title" : name;
@@ -71,8 +69,7 @@ public class Download implements Parcelable {
     }
 
     /**
-     * @param url
-     *            the url to set
+     * @param url the url to set
      */
     public void setUrl(String url) {
         this.url = url;

@@ -142,9 +142,7 @@ public class DownloadTabFragment extends ListFragment {
 
     }
 
-    /*
-     * Display section
-     */
+    /* Display section */
     private List<Download> completedDownloads;
     private LinearLayout progressBarsLayout;
 
@@ -179,9 +177,7 @@ public class DownloadTabFragment extends ListFragment {
         this.createList();
     }
 
-    /*
-     * Downloading section
-     */
+    /* Downloading section */
     private Map<Long, Download> currentDownloads = new HashMap<Long, Download>();
     private Map<Long, ProgressBar> currentProgressBars = new HashMap<Long, ProgressBar>();
 
@@ -200,15 +196,11 @@ public class DownloadTabFragment extends ListFragment {
                 long downloadId = d.getId();
                 DownloadTabFragment.this.currentDownloads.put(downloadId, d);
 
-                // get a new
-                // progressbar layout
-                // element
+                // get a new progressbar layout element
                 LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 ProgressBar p = (ProgressBar) layoutInflater.inflate(R.layout.download_progressbar, null);
 
-                // and add it to the
-                // progressbars
-                // layout
+                // and add it to the progressbars layout
                 DownloadTabFragment.this.progressBarsLayout.addView(p);
                 currentProgressBars.put(downloadId, p);
 
@@ -221,12 +213,7 @@ public class DownloadTabFragment extends ListFragment {
                 if (d == null)
                     return;
 
-                // we insert the
-                // download removed
-                // from
-                // currentDownloads
-                // into
-                // completedDownloads
+                // we insert the download removed from currentDownloads into completedDownloads
                 DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
                 db.insertDownload(d);
                 DownloadTabFragment.this.updateList();
