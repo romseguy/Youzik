@@ -23,7 +23,7 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 	public static final String ACTION_QUEUE_TRACK = INTENT_BASE_NAME + ".ACTION_QUEUE_TRACK";
 	public static final String ACTION_PLAY_TRACK = INTENT_BASE_NAME + ".ACTION_PLAY_TRACK";
 	
-	private List<Download> tracks = new ArrayList<Download>();
+	private List<Download> queuedTracks = new ArrayList<Download>();
 	private MediaPlayer mediaPlayer;
 	private boolean paused = false;
 	
@@ -46,7 +46,7 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.v("MediaPlayerService", "QUEUE_TRACK received");
-			tracks.add((Download) intent.getParcelableExtra(DownloadManagerService.DATA));
+			queuedTracks.add((Download) intent.getParcelableExtra(DownloadManagerService.DATA));
 		}
 	};
 	
@@ -56,8 +56,8 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 			Log.v("MediaPlayerService", "PLAY_TRACK received");
 			Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
 			stop();
-			tracks.clear();
-			tracks.add(d);
+			queuedTracks.clear();
+			queuedTracks.add(d);
 			play();
 		}
 	};
@@ -87,6 +87,11 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
         this.release();
     }
 	
+	@Override
+	public void onCompletion(MediaPlayer arg0) {
+		this.release();
+	}
+	
     private void release() {
         if (this.mediaPlayer == null) {
             return;
@@ -101,17 +106,17 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
     }
     
     public boolean isPlaying() {
-        if(this.tracks.isEmpty() || this.mediaPlayer == null) {
+        if(this.queuedTracks.isEmpty() || this.mediaPlayer == null) {
             return false;
         }
         return this.mediaPlayer.isPlaying();
     }
     
     public void play() {
-    	if (this.tracks.size() == 0)
+    	if (this.queuedTracks.size() == 0)
 			return;
     	
-    	Download d = tracks.get(0);
+    	Download d = queuedTracks.get(0);
 		
     	// the media player is already instanciated and paused so we can play the track right away
 		if (this.mediaPlayer != null && this.paused) {
@@ -133,33 +138,35 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 		}
     }
 
-	@Override
-	public void onCompletion(MediaPlayer arg0) {
-		this.release();
-	}
-	
 	public void stop() {
 		this.release();
 	}
 	
 	public void pause() {
-		if( mediaPlayer != null) {
-            mediaPlayer.pause();
-            paused = true;
+		if (this.mediaPlayer != null) {
+			this.mediaPlayer.pause();
+			this.paused = true;
         }
+	}
+	
+	public Download getCurrentTrack() {
+		if (queuedTracks.isEmpty())
+			return null;
+		
+		return queuedTracks.get(0);
 	}
 
 	public int getCurrentPosition() {
-        if (mediaPlayer == null)
+        if (this.mediaPlayer == null)
             return 0;
         
-        return mediaPlayer.getCurrentPosition();
+        return this.mediaPlayer.getCurrentPosition();
     }
 	
 	public int getDuration() {
-		if (mediaPlayer == null)
+		if (this.mediaPlayer == null)
 			return 0;
 		
-		return mediaPlayer.getDuration();
+		return this.mediaPlayer.getDuration();
 	}
 }

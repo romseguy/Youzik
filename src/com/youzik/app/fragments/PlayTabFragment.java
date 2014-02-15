@@ -1,6 +1,5 @@
 package com.youzik.app.fragments;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,8 +13,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,19 +23,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-public class PlayTabFragment extends Fragment implements
-		OnCompletionListener/*, SeekBar.OnSeekBarChangeListener*/ {
+public class PlayTabFragment extends Fragment {
+	
+	private String TAG = "PlayTabFragment";
+	private static final int UPDATE_INTERVAL = 250;
 	
 	private ServiceConnection serviceConnection = new MediaPlayerServiceConnection();
 	private MediaPlayerService mediaPlayerService;
     private Intent mediaPlayerIntent;
+    
+	private Timer waitForAudioPlayertimer = new Timer();
+	private Handler handler = new Handler();
+	private UpdateCurrentTrackTask updateCurrentTrackTask;
 	
 	private ImageButton btnPlay;
-	private TextView songTitleLabel;
+	private TextView trackNameLabel;
+	private TextView trackCurrentDurationLabel;
+	private TextView trackTotalDurationLabel;
 	//private ImageButton btnForward;
 	//private ImageButton btnBackward;
 	//private ImageButton btnNext;
@@ -46,47 +50,17 @@ public class PlayTabFragment extends Fragment implements
 	//private ImageButton btnRepeat;
 	//private ImageButton btnShuffle;
 	//private SeekBar songProgressBar;
-	//private TextView songCurrentDurationLabel;
-	//private TextView songTotalDurationLabel;
 	
-	//private Handler mHandler = new Handler();
-	
-	//private int seekForwardTime = 5000; // ms
-	//private int seekBackwardTime = 5000; // ms
-
 	//private boolean isShuffle = false;
 	//private boolean isRepeat = false;
-	
-	/*private Runnable mUpdateTimeTask = new Runnable() {
-	   public void run() {
-		   if (mediaPlayer == null)
-			   return;
-		   
-		   long totalDuration = mediaPlayerService.getDuration();
-		   long currentDuration = mediaPlayerService.getCurrentPosition();
-		  
-		   // Displaying Total Duration time
-		   songTotalDurationLabel.setText(""+Convert.milliSecondsToTimer(totalDuration));
-		   // Displaying time completed playing
-		   songCurrentDurationLabel.setText(""+Convert.milliSecondsToTimer(currentDuration));
-		   
-		   // Updating progress bar
-		   int progress = (int)(Convert.getProgressPercentage(currentDuration, totalDuration));
-		   //Log.d("Progress", ""+progress);
-		   songProgressBar.setProgress(progress);
-		   
-		   // Running this thread after 100 milliseconds
-	       mHandler.postDelayed(this, 100);
-	   }
-	};*/
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {		
 		View playTabView = inflater.inflate(R.layout.play_tab, container, false);
 		this.btnPlay = (ImageButton) playTabView.findViewById(R.id.btnPlay);
-		this.songTitleLabel = (TextView) playTabView.findViewById(R.id.songTitle);
-		//this.songCurrentDurationLabel = (TextView) playTabView.findViewById(R.id.songCurrentDurationLabel);
-		//this.songTotalDurationLabel = (TextView) playTabView.findViewById(R.id.songTotalDurationLabel);
+		this.trackNameLabel = (TextView) playTabView.findViewById(R.id.trackName);
+		this.trackCurrentDurationLabel = (TextView) playTabView.findViewById(R.id.trackCurrentDurationLabel);
+		this.trackTotalDurationLabel = (TextView) playTabView.findViewById(R.id.trackTotalDurationLabel);
 		//this.btnForward = (ImageButton) playTabView.findViewById(R.id.btnForward);
 		//this.btnBackward = (ImageButton) playTabView.findViewById(R.id.btnBackward);
 		//this.btnNext = (ImageButton) playTabView.findViewById(R.id.btnNext);
@@ -231,55 +205,9 @@ public class PlayTabFragment extends Fragment implements
 		});*/
 	}
 
-	@Override
-    public void onResume() {
-    	super.onResume();
-    	
-    	Log.v("PlayTabFragment", "onResume() called: binding to MediaPlayerService");
-    	mediaPlayerIntent = new Intent(this.getActivity(), MediaPlayerService.class);
-		this.getActivity().bindService(mediaPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-	
-    @Override
-    public void onPause() {
-		Log.v("PlayTabFragment", "onPause() called: unbinding from MediaPlayerService");
-		this.getActivity().unbindService(serviceConnection);
-		
-		super.onPause();
-    }
-	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-	}
-		
-	public void playDownload(Download d) {
-		Intent intent = new Intent(MediaPlayerService.ACTION_PLAY_TRACK);
-		intent.putExtra(DownloadManagerService.DATA, d);
-		this.getActivity().sendBroadcast(intent);
-		
-		updatePlayPauseButtonState();
-		songTitleLabel.setText(d.getName());
-		
-		//songProgressBar.setProgress(0);
-		//songProgressBar.setMax(100);
-		//updateProgressBar();
-	}
-	
-	private void updatePlayPauseButtonState() {
-		if (mediaPlayerService.isPlaying())
-			btnPlay.setImageResource(R.drawable.btn_pause);
-		else
-			btnPlay.setImageResource(R.drawable.btn_play);
-	}
-	
-	/*public void updateProgressBar() {
-        mHandler.postDelayed(mUpdateTimeTask, 100);        
-    }*/
-	
 	/**
 	 * Receiving song index from playlist view and play the song
-	 * */
+	 */
 	/*@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -291,53 +219,166 @@ public class PlayTabFragment extends Fragment implements
 	}*/
 	
 	@Override
-	public void onCompletion(MediaPlayer arg0) {
-		/*mediaPlayer.pause();
-		mediaPlayer.seekTo(0);
+    public void onResume() {
+    	super.onResume();
+    	
+    	Log.v(TAG, "onResume() called: bind to MediaPlayerService and handle UpdateCurrentTrackTask");
+    	mediaPlayerIntent = new Intent(this.getActivity(), MediaPlayerService.class);
+		this.getActivity().bindService(mediaPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 		
-		if (isRepeat)
-			mediaPlayer.start();
+		if (mediaPlayerService == null)
+			scheduleRefreshTask();
+		else
+			updateCurrentlyPlaying();
+    }
+	
+    @Override
+    public void onPause() {
+		Log.v(TAG, "onPause() called: unbind from MediaPlayerService and handle UpdateCurrentTrackTask");
+		updateCurrentTrackTask.stop();
+		updateCurrentTrackTask = null;
+		this.getActivity().unbindService(serviceConnection);
+		
+		super.onPause();
+    }
+	
+	public void playDownload(Download d) {
+		Intent intent = new Intent(MediaPlayerService.ACTION_PLAY_TRACK);
+		intent.putExtra(DownloadManagerService.DATA, d);
+		this.getActivity().sendBroadcast(intent);
+		
+		trackNameLabel.setText(d.getName());
+		btnPlay.setImageResource(R.drawable.btn_pause);
+	}
+
+	private void scheduleRefreshTask() {
+		waitForAudioPlayertimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				Log.d(TAG, "updateScreenAsync running timer");
+
+				if (mediaPlayerService != null) {
+					waitForAudioPlayertimer.cancel();
+					
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							updateCurrentlyPlaying();
+						}
+					});
+				}
+			}
+		}, 10, UPDATE_INTERVAL); // delay, period
+	}
+
+	private void updateCurrentlyPlaying() {
+		Download currentTrack = mediaPlayerService.getCurrentTrack();
+		Log.d(TAG, "currentTrack: " + currentTrack);
+		updatePlayPauseButtonState();
+
+		if (updateCurrentTrackTask == null) {
+			updateCurrentTrackTask = new UpdateCurrentTrackTask();
+			updateCurrentTrackTask.execute();
+		} else {
+			Log.e(TAG, "updateCurrentTrackTask is not null");
+		}
+	}
+	
+	private void updatePlayPauseButtonState() {
+		if (mediaPlayerService.isPlaying())
+			btnPlay.setImageResource(R.drawable.btn_pause);
 		else
 			btnPlay.setImageResource(R.drawable.btn_play);
+	}
+	
+	private void updatePlayPanel(final Download track) {
+        this.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int currentPosition = mediaPlayerService.getCurrentPosition();
+                //songProgressBar.setMax(track.getDuration());
+                //songProgressBar.setProgress(currentPosition);
+                PlayTabFragment.this.trackCurrentDurationLabel.setText(Convert.milliSecondsToTimer(currentPosition));
+            }
+        });
+    }
+	
+	private class UpdateCurrentTrackTask extends AsyncTask<Void, Download, Void> {
+
+		public boolean stopped = false;
+		public boolean paused = false;
 		
-		songProgressBar.setProgress(0);
-		updateProgressBar();*/
-		// check for repeat is ON or OFF
-		/*if (isRepeat) {
-			// repeat is on play same song again
-			playSong(currentSongIndex);
-		} else if (isShuffle) {
-			// shuffle is on - play a random song
-			Random rand = new Random();
-			currentSongIndex = rand.nextInt((songsList.size() - 1) - 0 + 1) + 0;
-			playSong(currentSongIndex);
-		} else {
-			// no repeat or shuffle ON - play next song
-			if (currentSongIndex < (songsList.size() - 1)) {
-				playSong(currentSongIndex + 1);
-				currentSongIndex = currentSongIndex + 1;
-			} else {
-				// play first song
-				playSong(0);
-				currentSongIndex = 0;
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			Download currentTrack = mediaPlayerService.getCurrentTrack();
+			
+			if (currentTrack == null)
+				return;
+			
+			if ("Unknown track".equals(trackNameLabel.getText()))
+				trackNameLabel.setText(currentTrack.getName());
+				
+			trackTotalDurationLabel.setText("" +Convert.milliSecondsToTimer(mediaPlayerService.getDuration()));	
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			while (!stopped) {
+				if (!paused) {
+					Download currentTrack = mediaPlayerService.getCurrentTrack();
+					
+					if (currentTrack != null)
+						publishProgress(currentTrack);
+				}
+				
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
-		}*/
+
+			Log.d(TAG, "UpdateCurrentTrackTask stopped");
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Download... track) {
+			if (stopped || paused) {
+				return;
+			}
+
+			updatePlayPanel(track[0]);
+		}
+
+		public void stop() {
+			stopped = true;
+		}
+
+		public void pause() {
+			this.paused = true;
+		}
+
+		public void unPause() {
+			this.paused = false;
+		}
 	}
 
 	private final class MediaPlayerServiceConnection implements ServiceConnection {
-		
-		@Override
-        public void onServiceConnected(ComponentName className, IBinder baBinder) {
-            Log.d("PlayTabFragment", "MediaPlayerServiceConnection Service connected");
-            mediaPlayerService = ((MediaPlayerService.MediaPlayerBinder) baBinder).getService();
-            getActivity().startService(mediaPlayerIntent);
-        }
 
-        public void onServiceDisconnected(ComponentName className) {
-            Log.d("MediaPlayerServiceConnection", "Service disconnected");
-            mediaPlayerService = null;
-        }
-        
-    }
-	
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder baBinder) {
+			Log.d(TAG, "MediaPlayerServiceConnection Service connected");
+			mediaPlayerService = ((MediaPlayerService.MediaPlayerBinder) baBinder).getService();
+			getActivity().startService(mediaPlayerIntent);
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+			Log.d(TAG, "MediaPlayerServiceConnection Service disconnected");
+			mediaPlayerService = null;
+		}
+
+	}
+
 }
