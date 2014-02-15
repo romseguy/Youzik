@@ -22,6 +22,8 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 	public static final String INTENT_BASE_NAME = "com.youzik.app.MediaPlayerService";
 	public static final String ACTION_QUEUE_TRACK = INTENT_BASE_NAME + ".ACTION_QUEUE_TRACK";
 	public static final String ACTION_PLAY_TRACK = INTENT_BASE_NAME + ".ACTION_PLAY_TRACK";
+	public static final String ACTION_PLAY_COMPLETED = INTENT_BASE_NAME + ".ACTION_PLAY_COMPLETED";
+	public static final String ACTION_PLAY_STARTED = INTENT_BASE_NAME + ".ACTION_PLAY_STARTED";
 	
 	private List<Download> queuedTracks = new ArrayList<Download>();
 	private MediaPlayer mediaPlayer;
@@ -90,6 +92,10 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
 		this.release();
+		
+		Intent intent = new Intent();
+		intent.setAction(ACTION_PLAY_COMPLETED);
+	    sendBroadcast(intent);
 	}
 	
     private void release() {
@@ -136,7 +142,18 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		Intent intent = new Intent();
+		intent.setAction(ACTION_PLAY_STARTED);
+		intent.putExtra(DownloadManagerService.DATA, d);
+	    sendBroadcast(intent);
     }
+    
+	public void seek(int timeInMillis) {
+		if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.seekTo(timeInMillis);
+        }
+	}
 
 	public void stop() {
 		this.release();
@@ -169,4 +186,5 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 		
 		return this.mediaPlayer.getDuration();
 	}
+
 }

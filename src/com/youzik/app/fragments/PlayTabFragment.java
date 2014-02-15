@@ -9,9 +9,11 @@ import com.youzik.app.helpers.Convert;
 import com.youzik.app.services.DownloadManagerService;
 import com.youzik.app.services.MediaPlayerService;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 public class PlayTabFragment extends Fragment {
@@ -42,6 +45,7 @@ public class PlayTabFragment extends Fragment {
 	private TextView trackNameLabel;
 	private TextView trackCurrentDurationLabel;
 	private TextView trackTotalDurationLabel;
+	private SeekBar trackProgressBar;
 	//private ImageButton btnForward;
 	//private ImageButton btnBackward;
 	//private ImageButton btnNext;
@@ -49,7 +53,6 @@ public class PlayTabFragment extends Fragment {
 	//private ImageButton btnPlaylist;
 	//private ImageButton btnRepeat;
 	//private ImageButton btnShuffle;
-	//private SeekBar songProgressBar;
 	
 	//private boolean isShuffle = false;
 	//private boolean isRepeat = false;
@@ -61,6 +64,7 @@ public class PlayTabFragment extends Fragment {
 		this.trackNameLabel = (TextView) playTabView.findViewById(R.id.trackName);
 		this.trackCurrentDurationLabel = (TextView) playTabView.findViewById(R.id.trackCurrentDurationLabel);
 		this.trackTotalDurationLabel = (TextView) playTabView.findViewById(R.id.trackTotalDurationLabel);
+		this.trackProgressBar = (SeekBar) playTabView.findViewById(R.id.trackProgressBar);
 		//this.btnForward = (ImageButton) playTabView.findViewById(R.id.btnForward);
 		//this.btnBackward = (ImageButton) playTabView.findViewById(R.id.btnBackward);
 		//this.btnNext = (ImageButton) playTabView.findViewById(R.id.btnNext);
@@ -68,8 +72,6 @@ public class PlayTabFragment extends Fragment {
 		//this.btnPlaylist = (ImageButton) playTabView.findViewById(R.id.btnPlaylist);
 		//this.btnRepeat = (ImageButton) playTabView.findViewById(R.id.btnRepeat);
 		//this.btnShuffle = (ImageButton) playTabView.findViewById(R.id.btnShuffle);
-		//this.songProgressBar = (SeekBar) playTabView.findViewById(R.id.songProgressBar);
-		//this.songProgressBar.setOnSeekBarChangeListener(new TimeLineChangeListener());
 		return playTabView;
 	}
 	
@@ -77,7 +79,7 @@ public class PlayTabFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		
-		//this.songProgressBar.setOnSeekBarChangeListener(this);
+		this.trackProgressBar.setOnSeekBarChangeListener(new ProgressBarChangeListener());
 		
 		btnPlay.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -226,10 +228,15 @@ public class PlayTabFragment extends Fragment {
     	mediaPlayerIntent = new Intent(this.getActivity(), MediaPlayerService.class);
 		this.getActivity().bindService(mediaPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 		
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(MediaPlayerService.ACTION_PLAY_COMPLETED);
+		intentFilter.addAction(MediaPlayerService.ACTION_PLAY_STARTED);
+		this.getActivity().registerReceiver(this.playReceiver, intentFilter);
+		
 		if (mediaPlayerService == null)
 			scheduleRefreshTask();
 		else
-			updateCurrentlyPlaying();
+			updateCurrentTrack();
     }
 	
     @Override
@@ -237,6 +244,8 @@ public class PlayTabFragment extends Fragment {
 		Log.v(TAG, "onPause() called: unbind from MediaPlayerService and handle UpdateCurrentTrackTask");
 		updateCurrentTrackTask.stop();
 		updateCurrentTrackTask = null;
+		
+		this.getActivity().unregisterReceiver(this.playReceiver);
 		this.getActivity().unbindService(serviceConnection);
 		
 		super.onPause();
@@ -246,9 +255,6 @@ public class PlayTabFragment extends Fragment {
 		Intent intent = new Intent(MediaPlayerService.ACTION_PLAY_TRACK);
 		intent.putExtra(DownloadManagerService.DATA, d);
 		this.getActivity().sendBroadcast(intent);
-		
-		trackNameLabel.setText(d.getName());
-		btnPlay.setImageResource(R.drawable.btn_pause);
 	}
 
 	private void scheduleRefreshTask() {
@@ -263,7 +269,7 @@ public class PlayTabFragment extends Fragment {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							updateCurrentlyPlaying();
+							updateCurrentTrack();
 						}
 					});
 				}
@@ -271,7 +277,7 @@ public class PlayTabFragment extends Fragment {
 		}, 10, UPDATE_INTERVAL); // delay, period
 	}
 
-	private void updateCurrentlyPlaying() {
+	private void updateCurrentTrack() {
 		Download currentTrack = mediaPlayerService.getCurrentTrack();
 		Log.d(TAG, "currentTrack: " + currentTrack);
 		updatePlayPauseButtonState();
@@ -296,8 +302,8 @@ public class PlayTabFragment extends Fragment {
             @Override
             public void run() {
                 int currentPosition = mediaPlayerService.getCurrentPosition();
-                //songProgressBar.setMax(track.getDuration());
-                //songProgressBar.setProgress(currentPosition);
+                trackProgressBar.setMax(mediaPlayerService.getDuration());
+                trackProgressBar.setProgress(currentPosition);
                 PlayTabFragment.this.trackCurrentDurationLabel.setText(Convert.milliSecondsToTimer(currentPosition));
             }
         });
@@ -356,14 +362,65 @@ public class PlayTabFragment extends Fragment {
 			stopped = true;
 		}
 
-		public void pause() {
-			this.paused = true;
-		}
-
-		public void unPause() {
-			this.paused = false;
+		public void setPaused(Boolean paused) {
+			this.paused = paused;
 		}
 	}
+	
+	private class ProgressBarChangeListener implements	SeekBar.OnSeekBarChangeListener {
+		
+		private Timer delayedSeekTimer;
+		
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+			if (!fromUser)
+				return;
+			
+			Log.d(TAG, "ProgressBarChangeListener progress received from user: " + progress);
+			scheduleSeek(progress);
+		}
+		
+		private void scheduleSeek(final int progress) {
+			if (delayedSeekTimer != null) {
+				delayedSeekTimer.cancel();
+			}
+			
+			delayedSeekTimer = new Timer();
+			delayedSeekTimer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					Log.d(TAG, "Delayed Seek Timer run");
+					mediaPlayerService.seek(progress);
+					updatePlayPanel(mediaPlayerService.getCurrentTrack());
+				}
+			}, 170);
+		}
+		
+		public void onStartTrackingTouch(SeekBar seekBar) {
+			Log.d(TAG, "ProgressBarChangeListener started tracking touch");
+			updateCurrentTrackTask.setPaused(true);
+		}
+		
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			Log.d(TAG, "ProgressBarChangeListener stopped tracking touch");
+			updateCurrentTrackTask.setPaused(false);
+		}
+		
+	}
+	
+	private BroadcastReceiver playReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction() == MediaPlayerService.ACTION_PLAY_STARTED) {
+				final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
+				trackNameLabel.setText(d.getName());
+				btnPlay.setImageResource(R.drawable.btn_pause);
+				trackProgressBar.setProgress(0);
+				trackProgressBar.setMax(mediaPlayerService.getDuration());
+			} else if (intent.getAction() == MediaPlayerService.ACTION_PLAY_COMPLETED) {
+				btnPlay.setImageResource(R.drawable.btn_play);		
+			}
+		}
+	};
 
 	private final class MediaPlayerServiceConnection implements ServiceConnection {
 

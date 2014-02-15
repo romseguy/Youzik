@@ -118,7 +118,7 @@
 
     <!-- Progress Bar/Seek bar -->
     <SeekBar
-        android:id="@+id/songProgressBar"
+        android:id="@+id/trackProgressBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/player_footer_bg"
@@ -133,7 +133,7 @@
         android:id="@+id/timerDisplay"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/songProgressBar"
+        android:layout_above="@id/trackProgressBar"
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp" >
@@ -167,13 +167,13 @@
         android:gravity="center" >
 
         <!-- Repeat Button -->
-        <ImageButton
+        <!--<ImageButton
             android:id="@+id/btnRepeat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
             android:background="@null"
-            android:src="@drawable/btn_repeat" />
+            android:src="@drawable/btn_repeat" />-->
 
         <!-- Shuffle Button -->
         <!--

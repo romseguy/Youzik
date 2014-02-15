@@ -3,8 +3,7 @@
     android:id="@+id/browse_tab"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:orientation="vertical">
     
     <WebView 
         android:id="@+id/webView"
