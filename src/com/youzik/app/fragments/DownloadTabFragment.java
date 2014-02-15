@@ -194,57 +194,51 @@ public class DownloadTabFragment extends ListFragment {
     	this.getActivity().startService(service);
 	}
     
-	private BroadcastReceiver downloadStartedReceiver = new BroadcastReceiver() {
+	private BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, Intent intent) {
-			final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
-			long downloadId = d.getId();
-			DownloadTabFragment.this.currentDownloads.put(downloadId, d);
-			
-			// get a new progressbar layout element
-			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			ProgressBar p = (ProgressBar) layoutInflater.inflate(R.layout.download_progressbar, null);
-			
-			// and add it to the progressbars layout
-			DownloadTabFragment.this.progressBarsLayout.addView(p);
-			currentProgressBars.put(downloadId, p);
-			
-			new ProgressAsyncTask(context, downloadId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
-	};
-	
-	private BroadcastReceiver downloadCompletedReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, DownloadTabFragment.this.currentDownloads.size()-1);
-			Download d = DownloadTabFragment.this.currentDownloads.remove(downloadId);
-			
-			if (d == null)
-				return;
-			
-			// we insert the download removed from currentDownloads into completedDownloads
-			DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
-			db.insertDownload(d);
-			DownloadTabFragment.this.updateList();
+			if (intent.getAction() == DownloadManagerService.ACTION_DOWNLOAD_STARTED) {
+				final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
+				long downloadId = d.getId();
+				DownloadTabFragment.this.currentDownloads.put(downloadId, d);
+				
+				// get a new progressbar layout element
+				LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				ProgressBar p = (ProgressBar) layoutInflater.inflate(R.layout.download_progressbar, null);
+				
+				// and add it to the progressbars layout
+				DownloadTabFragment.this.progressBarsLayout.addView(p);
+				currentProgressBars.put(downloadId, p);
+				
+				new ProgressAsyncTask(context, downloadId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			} else if (intent.getAction() == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
+				long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, DownloadTabFragment.this.currentDownloads.size()-1);
+				Download d = DownloadTabFragment.this.currentDownloads.remove(downloadId);
+				
+				if (d == null)
+					return;
+				
+				// we insert the download removed from currentDownloads into completedDownloads
+				DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
+				db.insertDownload(d);
+				DownloadTabFragment.this.updateList();
+			}
 		}
 	};
 	
 	@Override
 	public void onResume() {
-		IntentFilter intentFilter = new IntentFilter(DownloadManagerService.ACTION_DOWNLOAD_STARTED);
-		intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-		this.getActivity().registerReceiver(this.downloadStartedReceiver, intentFilter);
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(DownloadManagerService.ACTION_DOWNLOAD_STARTED);
+		intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+		this.getActivity().registerReceiver(this.downloadReceiver, intentFilter);
 		
-		intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-		intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-		this.getActivity().registerReceiver(this.downloadCompletedReceiver, intentFilter);
 		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
-		this.getActivity().unregisterReceiver(this.downloadStartedReceiver);
-		this.getActivity().unregisterReceiver(this.downloadCompletedReceiver);
+		this.getActivity().unregisterReceiver(this.downloadReceiver);
 		super.onPause();
 	}
 	

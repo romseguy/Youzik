@@ -61,7 +61,6 @@ public class DownloadManagerService extends IntentService {
 			// notifiy the BroadcastReceiver downloadStartedReceiver that the download has started
 			Intent intent = new Intent();
 			intent.setAction(ACTION_DOWNLOAD_STARTED);
-			intent.addCategory(Intent.CATEGORY_DEFAULT);
 			intent.putExtra(DownloadManagerService.DATA, d);
 		    sendBroadcast(intent);
 		}
