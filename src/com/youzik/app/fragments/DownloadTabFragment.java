@@ -78,8 +78,8 @@ public class DownloadTabFragment extends ListFragment {
 
     public class ProgressAsyncTask extends AsyncTask<Void, Integer, Void> {
 
-        private Context     context;
-        private Download    currentDownload;
+        private Context context;
+        private Download currentDownload;
         private ProgressBar currentProgressBar;
 
         public ProgressAsyncTask(Context context, long downloadId) {
@@ -146,7 +146,7 @@ public class DownloadTabFragment extends ListFragment {
      * Display section
      */
     private List<Download> completedDownloads;
-    private LinearLayout   progressBarsLayout;
+    private LinearLayout progressBarsLayout;
 
     private void createList() {
         this.completedDownloads = new ArrayList<Download>();
@@ -182,7 +182,7 @@ public class DownloadTabFragment extends ListFragment {
     /*
      * Downloading section
      */
-    private Map<Long, Download>    currentDownloads    = new HashMap<Long, Download>();
+    private Map<Long, Download> currentDownloads = new HashMap<Long, Download>();
     private Map<Long, ProgressBar> currentProgressBars = new HashMap<Long, ProgressBar>();
 
     public void startDownload(String url) {
@@ -193,46 +193,46 @@ public class DownloadTabFragment extends ListFragment {
 
     private BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
 
-                                                   @Override
-                                                   public void onReceive(final Context context, Intent intent) {
-                                                       if (intent.getAction() == DownloadManagerService.ACTION_DOWNLOAD_STARTED) {
-                                                           final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
-                                                           long downloadId = d.getId();
-                                                           DownloadTabFragment.this.currentDownloads.put(downloadId, d);
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            if (intent.getAction() == DownloadManagerService.ACTION_DOWNLOAD_STARTED) {
+                final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
+                long downloadId = d.getId();
+                DownloadTabFragment.this.currentDownloads.put(downloadId, d);
 
-                                                           // get a new
-                                                           // progressbar layout
-                                                           // element
-                                                           LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                                           ProgressBar p = (ProgressBar) layoutInflater.inflate(R.layout.download_progressbar, null);
+                // get a new
+                // progressbar layout
+                // element
+                LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                ProgressBar p = (ProgressBar) layoutInflater.inflate(R.layout.download_progressbar, null);
 
-                                                           // and add it to the
-                                                           // progressbars
-                                                           // layout
-                                                           DownloadTabFragment.this.progressBarsLayout.addView(p);
-                                                           currentProgressBars.put(downloadId, p);
+                // and add it to the
+                // progressbars
+                // layout
+                DownloadTabFragment.this.progressBarsLayout.addView(p);
+                currentProgressBars.put(downloadId, p);
 
-                                                           new ProgressAsyncTask(context, downloadId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                                                       }
-                                                       else if (intent.getAction() == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
-                                                           long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, DownloadTabFragment.this.currentDownloads.size() - 1);
-                                                           Download d = DownloadTabFragment.this.currentDownloads.remove(downloadId);
+                new ProgressAsyncTask(context, downloadId).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+            else if (intent.getAction() == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
+                long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, DownloadTabFragment.this.currentDownloads.size() - 1);
+                Download d = DownloadTabFragment.this.currentDownloads.remove(downloadId);
 
-                                                           if (d == null)
-                                                               return;
+                if (d == null)
+                    return;
 
-                                                           // we insert the
-                                                           // download removed
-                                                           // from
-                                                           // currentDownloads
-                                                           // into
-                                                           // completedDownloads
-                                                           DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
-                                                           db.insertDownload(d);
-                                                           DownloadTabFragment.this.updateList();
-                                                       }
-                                                   }
-                                               };
+                // we insert the
+                // download removed
+                // from
+                // currentDownloads
+                // into
+                // completedDownloads
+                DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
+                db.insertDownload(d);
+                DownloadTabFragment.this.updateList();
+            }
+        }
+    };
 
     @Override
     public void onResume() {

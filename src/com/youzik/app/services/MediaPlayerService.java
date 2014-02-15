@@ -19,17 +19,17 @@ import android.util.Log;
 
 public class MediaPlayerService extends Service implements OnCompletionListener {
 
-    public static final String INTENT_BASE_NAME      = "com.youzik.app.MediaPlayerService";
-    public static final String ACTION_QUEUE_TRACK    = INTENT_BASE_NAME + ".ACTION_QUEUE_TRACK";
-    public static final String ACTION_PLAY_TRACK     = INTENT_BASE_NAME + ".ACTION_PLAY_TRACK";
+    public static final String INTENT_BASE_NAME = "com.youzik.app.MediaPlayerService";
+    public static final String ACTION_QUEUE_TRACK = INTENT_BASE_NAME + ".ACTION_QUEUE_TRACK";
+    public static final String ACTION_PLAY_TRACK = INTENT_BASE_NAME + ".ACTION_PLAY_TRACK";
     public static final String ACTION_PLAY_COMPLETED = INTENT_BASE_NAME + ".ACTION_PLAY_COMPLETED";
-    public static final String ACTION_PLAY_STARTED   = INTENT_BASE_NAME + ".ACTION_PLAY_STARTED";
+    public static final String ACTION_PLAY_STARTED = INTENT_BASE_NAME + ".ACTION_PLAY_STARTED";
 
-    private List<Download>     queuedTracks          = new ArrayList<Download>();
-    private MediaPlayer        mediaPlayer;
-    private boolean            paused                = false;
+    private List<Download> queuedTracks = new ArrayList<Download>();
+    private MediaPlayer mediaPlayer;
+    private boolean paused = false;
 
-    private final IBinder      mediaPlayerBinder     = new MediaPlayerBinder();
+    private final IBinder mediaPlayerBinder = new MediaPlayerBinder();
 
     public class MediaPlayerBinder extends Binder {
 
@@ -47,25 +47,25 @@ public class MediaPlayerService extends Service implements OnCompletionListener 
 
     private BroadcastReceiver queueTrackReceiver = new BroadcastReceiver() {
 
-                                                     @Override
-                                                     public void onReceive(Context context, Intent intent) {
-                                                         Log.v("MediaPlayerService", "QUEUE_TRACK received");
-                                                         queuedTracks.add((Download) intent.getParcelableExtra(DownloadManagerService.DATA));
-                                                     }
-                                                 };
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v("MediaPlayerService", "QUEUE_TRACK received");
+            queuedTracks.add((Download) intent.getParcelableExtra(DownloadManagerService.DATA));
+        }
+    };
 
-    private BroadcastReceiver playTrackReceiver  = new BroadcastReceiver() {
+    private BroadcastReceiver playTrackReceiver = new BroadcastReceiver() {
 
-                                                     @Override
-                                                     public void onReceive(Context context, Intent intent) {
-                                                         Log.v("MediaPlayerService", "PLAY_TRACK received");
-                                                         Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
-                                                         stop();
-                                                         queuedTracks.clear();
-                                                         queuedTracks.add(d);
-                                                         play();
-                                                     }
-                                                 };
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v("MediaPlayerService", "PLAY_TRACK received");
+            Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
+            stop();
+            queuedTracks.clear();
+            queuedTracks.add(d);
+            play();
+        }
+    };
 
     @Override
     public void onCreate() {

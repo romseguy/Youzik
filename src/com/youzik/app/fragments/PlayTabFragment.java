@@ -30,22 +30,22 @@ import android.widget.TextView;
 
 public class PlayTabFragment extends Fragment {
 
-    private String                 TAG                     = "PlayTabFragment";
-    private static final int       UPDATE_INTERVAL         = 250;
+    private String TAG = "PlayTabFragment";
+    private static final int UPDATE_INTERVAL = 250;
 
-    private ServiceConnection      serviceConnection       = new MediaPlayerServiceConnection();
-    private MediaPlayerService     mediaPlayerService;
-    private Intent                 mediaPlayerIntent;
+    private ServiceConnection serviceConnection = new MediaPlayerServiceConnection();
+    private MediaPlayerService mediaPlayerService;
+    private Intent mediaPlayerIntent;
 
-    private Timer                  waitForAudioPlayertimer = new Timer();
-    private Handler                handler                 = new Handler();
+    private Timer waitForAudioPlayertimer = new Timer();
+    private Handler handler = new Handler();
     private UpdateCurrentTrackTask updateCurrentTrackTask;
 
-    private ImageButton            btnPlay;
-    private TextView               trackNameLabel;
-    private TextView               trackCurrentDurationLabel;
-    private TextView               trackTotalDurationLabel;
-    private SeekBar                trackProgressBar;
+    private ImageButton btnPlay;
+    private TextView trackNameLabel;
+    private TextView trackCurrentDurationLabel;
+    private TextView trackTotalDurationLabel;
+    private SeekBar trackProgressBar;
 
     // private ImageButton btnForward;
     // private ImageButton btnBackward;
@@ -293,7 +293,7 @@ public class PlayTabFragment extends Fragment {
     private class UpdateCurrentTrackTask extends AsyncTask<Void, Download, Void> {
 
         public boolean stopped = false;
-        public boolean paused  = false;
+        public boolean paused = false;
 
         @Override
         protected void onPreExecute() {
@@ -392,20 +392,20 @@ public class PlayTabFragment extends Fragment {
 
     private BroadcastReceiver playReceiver = new BroadcastReceiver() {
 
-                                               @Override
-                                               public void onReceive(Context context, Intent intent) {
-                                                   if (intent.getAction() == MediaPlayerService.ACTION_PLAY_STARTED) {
-                                                       final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
-                                                       trackNameLabel.setText(d.getName());
-                                                       btnPlay.setImageResource(R.drawable.btn_pause);
-                                                       trackProgressBar.setProgress(0);
-                                                       trackProgressBar.setMax(mediaPlayerService.getDuration());
-                                                   }
-                                                   else if (intent.getAction() == MediaPlayerService.ACTION_PLAY_COMPLETED) {
-                                                       btnPlay.setImageResource(R.drawable.btn_play);
-                                                   }
-                                               }
-                                           };
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() == MediaPlayerService.ACTION_PLAY_STARTED) {
+                final Download d = (Download) intent.getParcelableExtra(DownloadManagerService.DATA);
+                trackNameLabel.setText(d.getName());
+                btnPlay.setImageResource(R.drawable.btn_pause);
+                trackProgressBar.setProgress(0);
+                trackProgressBar.setMax(mediaPlayerService.getDuration());
+            }
+            else if (intent.getAction() == MediaPlayerService.ACTION_PLAY_COMPLETED) {
+                btnPlay.setImageResource(R.drawable.btn_play);
+            }
+        }
+    };
 
     private final class MediaPlayerServiceConnection implements ServiceConnection {
 

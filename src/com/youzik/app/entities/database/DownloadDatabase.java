@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 public class DownloadDatabase {
 
     private final DatabaseHelper databaseHelper;
-    private final String[]       fields = { DatabaseHelper.DOWNLOAD_TABLE_FIELD_ID, DatabaseHelper.DOWNLOAD_TABLE_FIELD_NAME, DatabaseHelper.DOWNLOAD_TABLE_FIELD_URL };
+    private final String[] fields = { DatabaseHelper.DOWNLOAD_TABLE_FIELD_ID, DatabaseHelper.DOWNLOAD_TABLE_FIELD_NAME, DatabaseHelper.DOWNLOAD_TABLE_FIELD_URL };
 
     public DownloadDatabase(Context context) {
         this.databaseHelper = DatabaseHelper.getInstance(context);

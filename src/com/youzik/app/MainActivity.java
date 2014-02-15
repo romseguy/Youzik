@@ -24,9 +24,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int BROWSE_TAB   = 0;
+        private static final int BROWSE_TAB = 0;
         private static final int DOWNLOAD_TAB = 1;
-        private static final int PLAY_TAB     = 2;
+        private static final int PLAY_TAB = 2;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);

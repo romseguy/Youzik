@@ -5,26 +5,26 @@ import android.os.Parcelable;
 
 public class Download implements Parcelable {
 
-    private long                                     id;
-    private String                                   name    = "";
-    private String                                   url     = "";
+    private long id;
+    private String name = "";
+    private String url = "";
 
     public static final Parcelable.Creator<Download> CREATOR = new Parcelable.Creator<Download>() {
 
-                                                                 @Override
-                                                                 public Download createFromParcel(Parcel source) {
-                                                                     Download dl = new Download();
-                                                                     dl.setId(source.readLong());
-                                                                     dl.setName(source.readString());
-                                                                     dl.setUrl(source.readString());
-                                                                     return dl;
-                                                                 }
+        @Override
+        public Download createFromParcel(Parcel source) {
+            Download dl = new Download();
+            dl.setId(source.readLong());
+            dl.setName(source.readString());
+            dl.setUrl(source.readString());
+            return dl;
+        }
 
-                                                                 @Override
-                                                                 public Download[] newArray(int size) {
-                                                                     return new Download[size];
-                                                                 }
-                                                             };
+        @Override
+        public Download[] newArray(int size) {
+            return new Download[size];
+        }
+    };
 
     @Override
     public void writeToParcel(Parcel dst, int flag) {

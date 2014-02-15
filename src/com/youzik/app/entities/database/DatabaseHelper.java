@@ -9,21 +9,21 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     /* database structure */
-    private static final int      DATABASE_VERSION          = 1;
-    private static final String   DATABASE_NAME             = "youzik_downloads.db";
+    private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "youzik_downloads.db";
 
-    public static final String    DOWNLOAD_TABLE_NAME       = "Download";
-    public static final String    DOWNLOAD_TABLE_FIELD_ID   = "_id";
-    public static final String    DOWNLOAD_TABLE_FIELD_NAME = "name";
-    public static final String    DOWNLOAD_TABLE_FIELD_URL  = "url";
+    public static final String DOWNLOAD_TABLE_NAME = "Download";
+    public static final String DOWNLOAD_TABLE_FIELD_ID = "_id";
+    public static final String DOWNLOAD_TABLE_FIELD_NAME = "name";
+    public static final String DOWNLOAD_TABLE_FIELD_URL = "url";
 
     /* queries */
-    private static final String   DOWNLOAD_TABLE_CREATE     = "CREATE TABLE " + DOWNLOAD_TABLE_NAME + " (" + DOWNLOAD_TABLE_FIELD_ID + " INTEGER PRIMARY KEY, " + DOWNLOAD_TABLE_FIELD_NAME + " TEXT NOT NULL, " + DOWNLOAD_TABLE_FIELD_URL + " TEXT NOT NULL" + ");";
+    private static final String DOWNLOAD_TABLE_CREATE = "CREATE TABLE " + DOWNLOAD_TABLE_NAME + " (" + DOWNLOAD_TABLE_FIELD_ID + " INTEGER PRIMARY KEY, " + DOWNLOAD_TABLE_FIELD_NAME + " TEXT NOT NULL, " + DOWNLOAD_TABLE_FIELD_URL + " TEXT NOT NULL" + ");";
 
     /* singletons */
-    private static DatabaseHelper instance                  = null;
-    private SQLiteDatabase        database;
-    private final AtomicInteger   getDatabaseCounter        = new AtomicInteger();
+    private static DatabaseHelper instance = null;
+    private SQLiteDatabase database;
+    private final AtomicInteger getDatabaseCounter = new AtomicInteger();
 
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

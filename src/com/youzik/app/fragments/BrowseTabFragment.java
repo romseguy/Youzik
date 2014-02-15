@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 public class BrowseTabFragment extends Fragment {
 
     private WebView webView;
-    private Bundle  webViewBundle;
+    private Bundle webViewBundle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

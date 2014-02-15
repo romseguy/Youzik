@@ -13,8 +13,8 @@ import android.util.Log;
 public class DownloadManagerService extends IntentService {
 
     public static final String ACTION_DOWNLOAD_STARTED = "com.youzik.app.intent.action.ACTION_DOWNLOAD_STARTED";
-    public static final String DATA                    = "download";
-    public static final String URL                     = "url";
+    public static final String DATA = "download";
+    public static final String URL = "url";
 
     public DownloadManagerService() {
         super("DownloadManagerService");
