@@ -10,7 +10,6 @@ import com.youzik.app.entities.Download;
 import com.youzik.app.entities.database.DownloadDatabase;
 import com.youzik.app.fragments.handlers.RequestPlayDownloadHandler;
 import com.youzik.app.services.DownloadManagerService;
-import com.youzik.app.services.MediaPlayerService;
 
 import android.app.Activity;
 import android.app.DownloadManager;
@@ -23,6 +22,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.ListFragment;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,16 +61,7 @@ public class DownloadTabFragment extends ListFragment {
                 }
             });
 
-            convertView.setOnLongClickListener(new View.OnLongClickListener() {
-
-                @Override
-                public boolean onLongClick(View v) {
-                    Intent intent = new Intent(MediaPlayerService.ACTION_QUEUE_TRACK);
-                    intent.putExtra(DownloadManagerService.DATA, item);
-                    DownloadTabFragment.this.getActivity().sendBroadcast(intent);
-                    return true;
-                }
-            });
+            convertView.setOnCreateContextMenuListener(DownloadTabFragment.this);
 
             return convertView;
         }
@@ -236,6 +228,13 @@ public class DownloadTabFragment extends ListFragment {
         this.getActivity().unregisterReceiver(this.downloadReceiver);
 
         super.onPause();
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        menu.add("Delete");
     }
 
 }
