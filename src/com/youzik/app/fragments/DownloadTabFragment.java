@@ -25,6 +25,7 @@ import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -228,6 +229,15 @@ public class DownloadTabFragment extends ListFragment {
         this.getActivity().unregisterReceiver(this.downloadReceiver);
 
         super.onPause();
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        this.completedDownloads.clear();
+        DownloadDatabase db = new DownloadDatabase(DownloadTabFragment.this.getActivity());
+        db.dropDatabase();
+        this.updateList();
+        return super.onContextItemSelected(item);
     }
 
     @Override

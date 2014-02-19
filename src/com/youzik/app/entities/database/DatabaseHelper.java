@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+    
+    Context context;
 
     /* database structure */
     private static final int DATABASE_VERSION = 1;
@@ -27,7 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        // context.deleteDatabase(DATABASE_NAME);
+        this.context = context;
     }
 
     /**
@@ -52,6 +54,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void closeDatabase() {
         if (this.getDatabaseCounter.decrementAndGet() == 0)
             this.database.close();
+    }
+    
+    public void deleteDatabase() {
+        context.deleteDatabase(DATABASE_NAME);
     }
 
     @Override

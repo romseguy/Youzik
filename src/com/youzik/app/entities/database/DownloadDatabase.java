@@ -18,6 +18,10 @@ public class DownloadDatabase {
     public DownloadDatabase(Context context) {
         this.databaseHelper = DatabaseHelper.getInstance(context);
     }
+    
+    public void dropDatabase() {
+        this.databaseHelper.deleteDatabase();
+    }
 
     public void insertDownload(Download d) {
         ContentValues values = new ContentValues();
